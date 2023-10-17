@@ -7,13 +7,12 @@ public class Animal {
 
     public Animal(String name) {
         this.name = name;
-        System.out.println("Construct Rabbit");
+        System.out.println("Construct an animal.");
     }
 
     public boolean move() {
         return true;
     }
-
 
     public void setCol(int col) {
         this.col = col;

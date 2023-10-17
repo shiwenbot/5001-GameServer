@@ -4,4 +4,9 @@ public class CustomExceptions {
             super(message);
         }
     }
+    public static class CreatureExistsException extends Exception{
+        public CreatureExistsException(String message) {
+            super(message);
+        }
+    }
 }
