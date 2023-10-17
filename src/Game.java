@@ -1,20 +1,28 @@
 import Animal.Animal;
 import Animal.*;
 import Creature.*;
+import Exceptions.*;
 
 
 import java.util.Random;
 
 public class Game {
+    private static Game instance;
     final private int ROW = 20;
     final private int COL = 20;
     Square[][] board = new Square[ROW][COL];
     //int turn;
 
+    public static Game getInstance(long seed) {
+        if (instance == null) {
+            instance = new Game(seed);
+        }
+        return instance;
+    }
     /*
      *
      * */
-    Game(long seed) {
+    private Game(long seed) {
         initializeBoard();
 
         //initialize animal and creatures
@@ -117,7 +125,7 @@ public class Game {
                 System.out.println("The random num is " + randomCol);
                 board[0][randomCol].setAnimal(animal);
                 System.out.println("有动物： " + board[0][randomCol].isHasAnimal());
-            }catch (CustomExceptions.AnimalExistsException e) {
+            }catch (AnimalExistsException e) {
                 e.printStackTrace();
                 continue;
             }
@@ -133,7 +141,7 @@ public class Game {
                 System.out.println("The randomCol is " + randomCol + " and randomRow is " + randomRow);
                 board[randomRow][randomCol].setCreature(creature);
                 System.out.println("有怪物： " + board[randomRow][randomCol].isHasCreature());
-            }catch (CustomExceptions.CreatureExistsException e) {
+            }catch (CreatureExistsException e) {
                 e.printStackTrace();
                 continue;
             }

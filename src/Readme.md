@@ -1,1 +1,1 @@
-1.超出ROW和COL要有一个exception
+感觉创建新的exception没什么必要，都改成一般exception的吧

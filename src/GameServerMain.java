@@ -1,6 +1,6 @@
 public class GameServerMain {
     public static void main(String[] args) {
-        Game game = new Game(1);
+        Game game = Game.getInstance(1);
         System.out.println("End of main!");
     }
 }

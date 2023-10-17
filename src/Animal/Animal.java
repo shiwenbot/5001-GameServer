@@ -1,5 +1,8 @@
 package Animal;
 
+import Exceptions.ExceedMoveRangeException;
+import Exceptions.NotStraightLineException;
+
 public class Animal {
     private String name;
     private int col;
@@ -10,7 +13,7 @@ public class Animal {
         System.out.println("Construct an animal.");
     }
 
-    public boolean move() {
+    public boolean move(int oldRow, int oldCol, int newRow, int newCol) throws Exception {
         return true;
     }
 

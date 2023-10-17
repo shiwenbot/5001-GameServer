@@ -1,5 +1,7 @@
 import Animal.*;
 import Creature.*;
+import Exceptions.AnimalExistsException;
+import Exceptions.CreatureExistsException;
 
 public class Square {
     private int row;
@@ -22,9 +24,9 @@ public class Square {
     }
     boolean isHasCreature() {return hasCreature;}
     //更改动物的位置，即col和row的值
-    void setAnimal(Animal animal) throws CustomExceptions.AnimalExistsException {
+    void setAnimal(Animal animal) throws AnimalExistsException {
         if(this.isHasAnimal()){
-            throw new CustomExceptions.AnimalExistsException("There is an animal in this Square!");
+            throw new AnimalExistsException("There is an animal in this Square!");
         }
         else{
             animal.setCol(this.col);
@@ -33,9 +35,9 @@ public class Square {
         }
     }
 
-    void setCreature(Creature creature) throws CustomExceptions.CreatureExistsException {
+    void setCreature(Creature creature) throws CreatureExistsException {
         if(this.isHasCreature()){
-            throw new CustomExceptions.CreatureExistsException("There is a creature in this Square!");
+            throw new CreatureExistsException("There is a creature in this Square!");
         }
         else{
             creature.setCol(this.col);
