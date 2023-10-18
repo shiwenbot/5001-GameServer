@@ -1,3 +1,5 @@
+import Board.Game;
+
 public class GameServerMain {
     public static void main(String[] args) {
         Game game = Game.getInstance(1);

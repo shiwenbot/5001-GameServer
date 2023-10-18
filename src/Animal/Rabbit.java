@@ -1,7 +1,6 @@
 package Animal;
 
-import Exceptions.ExceedMoveRangeException;
-import Exceptions.NotStraightLineException;
+import Board.Game;
 
 public class Rabbit extends Animal {
 
@@ -23,6 +22,7 @@ public class Rabbit extends Animal {
     public boolean move(int oldRow, int oldCol, int newRow, int newCol) throws Exception {
         int rowMovement = Math.abs(oldRow - newRow);
         int colMovement = Math.abs(oldCol - newCol);
+        Game game = Game.getInstance(1);
         //超出范围
         if(rowMovement > 2 || colMovement > 2){
             throw new Exception("Rabbit is trying to move to far!");
@@ -33,10 +33,45 @@ public class Rabbit extends Animal {
         }
         //跳
         else if(rowMovement == 2 || colMovement == 2){
-            //判断怪物在第一步或者第二步
-            return true;
+            if(rowMovement == 0){
+                //如果怪物在第一步
+                //八个方向要一个一个判断吗？可以简化到判断3次，判断rowMovement，colMovement是否为0
+                if (withCreature(newRow, oldCol + (newCol - oldCol) / 2)){
+                    game.getSquare(newRow, oldCol + (newCol - oldCol) / 2).setAnimal(this);
+                }
+                //或者第二步
+                else{
+                    game.getSquare(newRow, newCol).setAnimal(this);
+                }
+                game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
+                return true;
+            }
+            else if(colMovement == 0){
+                if(withCreature(oldRow + (newRow - oldRow) / 2, newCol)){
+                    game.getSquare(oldRow + (newRow - oldRow) / 2, newCol).setAnimal(this);
+                    game.getSquare(oldRow, oldCol).setHasAnimal(false);
+                }
+                else{
+                    game.getSquare(newRow, newCol).setAnimal(this);
+                }
+                game.getSquare(oldRow, oldCol).setHasAnimal(false);
+                return true;
+            }else{
+                if (withCreature(oldRow + (newRow - oldRow) / 2, oldCol + (newCol - oldCol) / 2)){
+                    game.getSquare(oldRow + (newRow - oldRow) / 2, oldCol + (newCol - oldCol) / 2).setAnimal(this);
+                }
+                else{
+                    game.getSquare(newRow, newCol).setAnimal(this);
+                }
+                game.getSquare(oldRow, oldCol).setHasAnimal(false);
+                return true;
+            }
         }
-        return true;
+        //走
+        else if(rowMovement == 1 || colMovement == 1){
+
+        }
+        return false;
     }
 
     //判断兔子是不是走的直线
@@ -46,16 +81,13 @@ public class Rabbit extends Animal {
         if((oldRow == newRow) || (oldCol == newCol) || (rowMovement == colMovement)){
             return true;
         }
-        //(2,1)(1,2)
-        else if((rowMovement == 2 && colMovement == 1) ||
-                (rowMovement == 1 && colMovement == 2)){
-            return false;
-        }
-        //(2,2)
-        return true;
+        else return false;
     }
 
-    private boolean withCreature(){
-        return true;
+    //判断格子中是否已经有了怪物
+    private boolean withCreature(int row, int col){
+        Game game = Game.getInstance(1);
+        if(game.getSquare(row, col).isHasCreature()) return true;
+        return false;
     }
 }

@@ -1,12 +1,12 @@
 package Animal;
 
-import Exceptions.ExceedMoveRangeException;
-import Exceptions.NotStraightLineException;
+import Board.*;
+
+
+import static Board.Data.objectPosition;
 
 public class Animal {
     private String name;
-    private int col;
-    private int row;
 
     public Animal(String name) {
         this.name = name;
@@ -17,11 +17,11 @@ public class Animal {
         return true;
     }
 
-    public void setCol(int col) {
-        this.col = col;
-    }
-
-    public void setRow(int row) {
-        this.row = row;
+    public Square getSquare(Animal animal){
+        Game game = Game.getInstance(1);
+        Data.Coordinate coordinate = objectPosition.get(animal);
+        int row = coordinate.getRow();
+        int col = coordinate.getCol();
+        return game.getSquare(row, col);
     }
 }
