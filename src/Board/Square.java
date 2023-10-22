@@ -2,19 +2,16 @@ package Board;
 
 import Animal.*;
 import Creature.*;
-import Exceptions.AnimalExistsException;
-import Exceptions.CreatureExistsException;
 
-import static Board.Data.objectPosition;
+import static Board.Game.objectPosition;
+
 
 public class Square {
     private int row;
     private int col;
-    private Animal animal;
     private boolean hasAnimal = false;
     private boolean hasCreature = false;
-    //boolean visible;
-    //Creature.Creature creature;
+    private boolean visible = false;
 
     Square(int row, int col){
         this.row = row;
@@ -37,21 +34,31 @@ public class Square {
             throw new Exception("There is an animal in this Board.Square!");
         }
         else{
-            Data.Coordinate coordinate = new Data.Coordinate(this.row, this.col);
+            Coordinate coordinate = new Coordinate(this.row, this.col);
             objectPosition.put(animal, coordinate);
+            //System.out.println("Put animal in objectPosition successfully!");
             this.hasAnimal = true;
         }
     }
 
-    void setCreature(Creature creature) throws Exception {
+    public void setCreature(Creature creature) throws Exception {
         if(this.isHasCreature()){
             throw new Exception("There is a creature in this Board.Square!");
         }
         else{
-            creature.setCol(this.col);
-            creature.setRow(this.row);
+            Coordinate coordinate = new Coordinate(this.row, this.col);
+            objectPosition.put(creature, coordinate);
             this.hasCreature = true;
+            System.out.println("Unicorn is at " + this.row + " " + this.col);
         }
+    }
+
+    public boolean isVisible(){
+        return visible;
+    }
+
+    public void changeVisibile(boolean bool){
+        this.visible = bool;
     }
 
     public int getRow() {
