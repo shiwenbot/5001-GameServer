@@ -9,27 +9,27 @@ import java.util.*;
 
 public class Game {
     private static Game instance;
-    final private int ROW = 20;
-    final private int COL = 20;
+    public final int ROW = 20;
+    public final int COL = 20;
     public Square[][] board = new Square[ROW][COL];
     public int turn = 0;
     public static List<Animal> animals = new ArrayList<>();
-    //private List<Creature> creatures = new ArrayList<>();
+    public static List<Creature> creatures = new ArrayList<>();
     private String[] moveOrder = {"Rabbit", "Fox", "Deer", "Owl", "Badger"};
     private static List<Animal> shieldAnimal = new ArrayList<>();
     public static HashMap<Object, Coordinate> objectPosition = new HashMap<>();
 
     public Rabbit rabbit;
     public Fox fox;
-    private Deer deer;
-    private Owl owl;
-    private Badger badger;
+    public Deer deer;
+    public Owl owl;
+    public Badger badger;
 
     public Unicorn unicorn;
-    private Centaur centaur;
-    private Dragon dragon;
-    private Phoenix phoenix;
-    private Sphinx sphinx;
+    public Centaur centaur;
+    public Dragon dragon;
+    public Phoenix phoenix;
+    public Sphinx sphinx;
 
     public static Game getInstance(long seed) {
         if (instance == null) {
@@ -61,6 +61,11 @@ public class Game {
         dragon = new Dragon("Dragon");
         phoenix = new Phoenix("Phoenix");
         sphinx = new Sphinx("Sphinx");
+        creatures.add(unicorn);
+        creatures.add(centaur);
+        creatures.add(dragon);
+        creatures.add(phoenix);
+        creatures.add(sphinx);
 
         Random random = new Random(seed);
         int randomCol, randomRow;
@@ -149,7 +154,6 @@ public class Game {
         }catch (Exception e){
             System.out.println("Error: " + e.getMessage());
         }
-
     }
 
     public Square getSquare(int row, int col){

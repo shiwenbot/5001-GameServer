@@ -49,7 +49,7 @@ public class Square {
             Coordinate coordinate = new Coordinate(this.row, this.col);
             objectPosition.put(creature, coordinate);
             this.hasCreature = true;
-            System.out.println("Unicorn is at " + this.row + " " + this.col);
+            System.out.println( creature.name + "is at " + this.row + " " + this.col);
         }
     }
 

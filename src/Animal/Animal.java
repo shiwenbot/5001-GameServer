@@ -2,12 +2,17 @@ package Animal;
 
 import Board.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static Board.Game.objectPosition;
 
 
 public class Animal {
-    private String name;
-    private int lifePoints;
+    public String name;
+    public Map<Spell, Integer> spells = new HashMap<>();
+    public int lifePoints;
+    public String description;
 
     public Animal(String name) {
         this.name = name;
@@ -32,5 +37,16 @@ public class Animal {
 
     public void heal(){
         this.lifePoints += 10;
+    }
+
+    public String getDescription() {
+        return null;
+    }
+    public Map<Spell, Integer> getSpells() {
+        return spells;
+    }
+
+    public int getLifePoints() {
+        return lifePoints;
     }
 }

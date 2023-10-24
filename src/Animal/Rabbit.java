@@ -1,9 +1,33 @@
 package Animal;
 
 import Board.Game;
+import Board.Spell;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Rabbit extends Animal {
+    public String name = "Rabbit";
+    public Map<Spell, Integer> spells = new HashMap<>();
+    public String description = "The rabbit has fluffy ears and tail. The rabbit really likes to eat grass.";
+    public int lifePoints = 100;
 
+    @Override
+    public String getDescription() {
+        return this.description;
+    }
+    @Override
+    public String getName() {
+        return name;
+    }
+    @Override
+    public Map<Spell, Integer> getSpells() {
+        return spells;
+    }
+    @Override
+    public int getLifePoints() {
+        return lifePoints;
+    }
     // 私有构造方法，防止外部实例化
     public Rabbit(String name) {
         super(name);

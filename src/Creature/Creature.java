@@ -2,9 +2,29 @@ package Creature;
 
 
 public class Creature {
-    private String name;
-    private int attackValue;
+    public String name;
+    public String shortName;
+    public int attack;
+    public String description;
     private boolean confused;
+    public String getName() {
+        return name;
+    }
+
+    public String getShortName() {
+        return shortName;
+    }
+
+    public int getAttack() {
+        return attack;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+
+
 
     public Creature(String name) {
         this.name = name;
