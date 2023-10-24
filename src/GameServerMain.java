@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import static Board.Game.*;
@@ -127,11 +128,11 @@ public class GameServerMain {
 
     // 实现获取游戏状态的方法
     private static String getGameData() {
-        Game game = Game.getInstance(1);
+        //Game game = Game.getInstance(1);
         //这个map存储了所有的有生物的坐标，如果一个格子有很多object怎么办？
-        HashMap<Integer, Integer> locationMap = new HashMap<>();
+        ArrayList<Coordinate> locationList = new ArrayList<>();
         for (Coordinate coordinate : objectPosition.values()) {
-            locationMap.put(coordinate.getRow(), coordinate.getCol());
+            locationList.add(coordinate);
         }
 
         JsonArrayBuilder board = Json.createArrayBuilder();
@@ -140,7 +141,7 @@ public class GameServerMain {
             JsonArrayBuilder rowBoard = Json.createArrayBuilder();
             for (int col = 0; col < 20; col++) {
                 //如果当前坐标存在于map说明有生物
-                if(hasObject(row, col, locationMap)){
+                if(hasObject(row, col, locationList)){
                     //需要考虑是否同时存在动物和spell
                     if (isAnimal(row, col) != null && isCreature(row, col) != null){
                         JsonObjectBuilder cellDetailBuilder1 = Json.createObjectBuilder();
@@ -197,8 +198,11 @@ public class GameServerMain {
         return gameString;
     }
 
-    private static boolean hasObject(int row, int col, HashMap<Integer, Integer> map){
-        if(map.containsKey(row) && map.get(row) == col) return true;
+    private static boolean hasObject(int row, int col, ArrayList<Coordinate> locationList){
+        for (Coordinate coordinate: locationList) {
+            if (coordinate.getRow() == row && coordinate.getCol() == col)
+                return true;
+        }
         return false;
     }
 

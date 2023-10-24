@@ -224,7 +224,7 @@ public class Game {
             try {
                 //System.out.println("The random num is " + randomCol);
                 board[0][randomCol].setAnimal(animal);
-                //System.out.println("ÓÐ¶¯Îï£º " + board[0][randomCol].isHasAnimal());
+                System.out.println(animal.getName() + "is at col£º " + randomCol);
             }catch (Exception e) {
                 e.printStackTrace();
                 continue;
