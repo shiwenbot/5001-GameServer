@@ -4,7 +4,7 @@ import Board.Spell;
 
 import java.util.Map;
 
-public class Badger extends Animal{
+public class Badger extends Animal {
     public int lifePoints = 100;
     public String description = "Badger description";
 

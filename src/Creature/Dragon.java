@@ -3,8 +3,8 @@ package Creature;
 public class Dragon extends Creature{
     public Dragon(String name) {
         super(name);
-        shortName = "Uni";
+        shortName = "DD";
         attack = 1;
-        description = "Uni";
+        description = "The DD is a dragon that practices social engineering. The dragon is very good at sending phishing emails pretending to be a prince.";
     }
 }

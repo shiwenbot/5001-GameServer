@@ -1,6 +1,6 @@
 package Board;
 
-import Animal.*;
+import Animal.Animal;
 import Creature.*;
 
 import static Board.Game.objectPosition;
@@ -37,7 +37,7 @@ public class Square {
             Coordinate coordinate = new Coordinate(this.row, this.col);
             objectPosition.put(animal, coordinate);
             //System.out.println("Put animal in objectPosition successfully!");
-            this.hasAnimal = true;
+            setHasAnimal(true);
         }
     }
 

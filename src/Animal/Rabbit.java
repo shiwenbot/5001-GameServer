@@ -6,6 +6,9 @@ import Board.Spell;
 import java.util.HashMap;
 import java.util.Map;
 
+import static Server.GameServerMain.seed;
+import static Board.Game.errorMessage;
+
 public class Rabbit extends Animal {
     public String name = "Rabbit";
     public Map<Spell, Integer> spells = new HashMap<>();
@@ -46,14 +49,20 @@ public class Rabbit extends Animal {
     public boolean move(int oldRow, int oldCol, int newRow, int newCol) throws Exception {
         int rowMovement = Math.abs(oldRow - newRow);
         int colMovement = Math.abs(oldCol - newCol);
-        Game game = Game.getInstance(1);
+
+        Game game = Game.getInstance(seed);
         //超出范围
         if(rowMovement > 2 || colMovement > 2){
-            throw new Exception("Rabbit is trying to move to far!");
+            errorMessage = "The rabbit can only move 2 spaces in a straight line.";
+            throw new Exception(errorMessage);
         }
         //不走直线
         else if(!isStraightLine(oldRow, oldCol, newRow, newCol)){
-            throw new Exception("This animal is not moving by a straight line!");
+            errorMessage = "The rabbit can only move in a straight line.";
+            throw new Exception(errorMessage);
+        }else if(game.board[newRow][newCol].isHasAnimal()){
+            errorMessage = "There is an animal in this square.";
+            throw new Exception(errorMessage);
         }
         //跳
         else if(rowMovement == 2 || colMovement == 2){
@@ -93,7 +102,9 @@ public class Rabbit extends Animal {
         }
         //走
         else if(rowMovement == 1 || colMovement == 1){
-
+            game.getSquare(newRow, newCol).setAnimal(this);
+            game.getSquare(oldRow, oldCol).setHasAnimal(false);
+            return true;
         }
         return false;
     }
@@ -106,12 +117,5 @@ public class Rabbit extends Animal {
             return true;
         }
         else return false;
-    }
-
-    //判断格子中是否已经有了怪物
-    private boolean withCreature(int row, int col){
-        Game game = Game.getInstance(1);
-        if(game.getSquare(row, col).isHasCreature()) return true;
-        return false;
     }
 }

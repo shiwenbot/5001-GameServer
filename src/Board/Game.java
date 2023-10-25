@@ -1,6 +1,5 @@
 package Board;
 
-import Animal.Animal;
 import Animal.*;
 import Creature.*;
 
@@ -18,6 +17,8 @@ public class Game {
     private String[] moveOrder = {"Rabbit", "Fox", "Deer", "Owl", "Badger"};
     private static List<Animal> shieldAnimal = new ArrayList<>();
     public static HashMap<Object, Coordinate> objectPosition = new HashMap<>();
+    public static String errorMessage = null;
+
 
     public Rabbit rabbit;
     public Fox fox;
@@ -37,6 +38,7 @@ public class Game {
         }
         return instance;
     }
+
     /*
      *
      * */
@@ -56,11 +58,11 @@ public class Game {
         animals.add(badger);
 
         //initialize Creatures
-        unicorn = new Unicorn("Unicorn");
-        centaur = new Centaur("Centaur");
-        dragon = new Dragon("Dragon");
-        phoenix = new Phoenix("Phoenix");
-        sphinx = new Sphinx("Sphinx");
+        unicorn = new Unicorn("Under-appreciated Unicorn");
+        centaur = new Centaur("Complicated Centaur");
+        dragon = new Dragon("Deceptive Dragon");
+        phoenix = new Phoenix("Precocious Phoenix");
+        sphinx = new Sphinx("Sassy Sphinx");
         creatures.add(unicorn);
         creatures.add(centaur);
         creatures.add(dragon);
@@ -73,27 +75,27 @@ public class Game {
         //place Animals
         for (int i = 0; i < 5; i++) {
             switch (i) {
-                case 0 : {
+                case 0: {
                     randomCol = random.nextInt(20);
                     placeAnimal(randomCol, rabbit, board);
                     break;
                 }
-                case 1 : {
+                case 1: {
                     randomCol = random.nextInt(20);
                     placeAnimal(randomCol, fox, board);
                     break;
                 }
-                case 2 : {
+                case 2: {
                     randomCol = random.nextInt(20);
                     placeAnimal(randomCol, deer, board);
                     break;
                 }
-                case 3 : {
+                case 3: {
                     randomCol = random.nextInt(20);
                     placeAnimal(randomCol, owl, board);
                     break;
                 }
-                case 4 : {
+                case 4: {
                     randomCol = random.nextInt(20);
                     placeAnimal(randomCol, badger, board);
                     break;
@@ -103,32 +105,32 @@ public class Game {
 
         //place Creatures
         for (int i = 0; i < 5; i++) {
-            switch(i){
-                case 0 : {
+            switch (i) {
+                case 0: {
                     randomRow = random.nextInt(18) + 1;//exclude the first and the last row
                     randomCol = random.nextInt(20);
                     placeCreature(randomRow, randomCol, unicorn, board);
                     break;
                 }
-                case 1 : {
+                case 1: {
                     randomRow = random.nextInt(18) + 1;//exclude the first and the last row
                     randomCol = random.nextInt(20);
                     placeCreature(randomRow, randomCol, centaur, board);
                     break;
                 }
-                case 2 : {
+                case 2: {
                     randomRow = random.nextInt(18) + 1;//exclude the first and the last row
                     randomCol = random.nextInt(20);
                     placeCreature(randomRow, randomCol, dragon, board);
                     break;
                 }
-                case 3 : {
+                case 3: {
                     randomRow = random.nextInt(18) + 1;//exclude the first and the last row
                     randomCol = random.nextInt(20);
                     placeCreature(randomRow, randomCol, phoenix, board);
                     break;
                 }
-                case 4 : {
+                case 4: {
                     randomRow = random.nextInt(18) + 1;//exclude the first and the last row
                     randomCol = random.nextInt(20);
                     placeCreature(randomRow, randomCol, sphinx, board);
@@ -136,32 +138,34 @@ public class Game {
                 }
             }
         }
+
+//        try {
+//            board[18][5].setCreature(phoenix);
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     public void moveAnimal(Animal animal, int oldRow, int oldCol, int newRow, int newCol) throws Exception {
-        try{
-            if(animal.getName().equals(moveOrder[turn])){
-                animal.move(oldRow, oldCol, newRow, newCol);
-                Animal preAnimal = findPreviousAnimal(animal);
-                if (shieldAnimal.contains(preAnimal)){
-                    shieldAnimal.remove(animal);
-                }
-                turn++;
-                if(turn == moveOrder.length) turn = 0;
-            }else{
-                throw new Exception("You should move animals in order.");
+        if (animal.getName().equals(moveOrder[turn])) {
+            animal.move(oldRow, oldCol, newRow, newCol);
+            Animal preAnimal = findPreviousAnimal(animal);
+            if (shieldAnimal.contains(preAnimal)) {
+                shieldAnimal.remove(animal);
             }
-        }catch (Exception e){
-            System.out.println("Error: " + e.getMessage());
+            turn++;
+            if (turn == moveOrder.length) turn = 0;
+        } else {
+            throw new Exception("You should move animals in order.");
         }
     }
 
-    public Square getSquare(int row, int col){
+    public Square getSquare(int row, int col) {
         return board[row][col];
     }
 
     public void castSpell(Animal animal, Spell spell) throws Exception {
-        if(animal.getName().equals(moveOrder[turn])){
+        if (animal.getName().equals(moveOrder[turn])) {
             SpellType spellType = spell.getType();
 
             switch (spellType) {
@@ -169,8 +173,8 @@ public class Game {
                     int curRow = animal.getSquare(animal).getRow();
                     int curCol = animal.getSquare(animal).getCol();
 
-                    int[] dirRow = { -1, 0, 1, -1, 1, -1, 0, 1 };
-                    int[] dirCol = { -1, -1, -1, 0, 0, 1, 1, 1 };
+                    int[] dirRow = {-1, 0, 1, -1, 1, -1, 0, 1};
+                    int[] dirCol = {-1, -1, -1, 0, 0, 1, 1, 1};
 
                     for (int i = 0; i < 8; i++) {
                         int adjacentRow = curRow + dirRow[i];
@@ -185,7 +189,7 @@ public class Game {
                     shieldAnimal.add(animal);
                 case CONFUSE:
                     //如果有的话，先返回这个怪物，让它中招一个回合
-                    if(nearCreature(animal) != null){
+                    if (nearCreature(animal) != null) {
                         nearCreature(animal).setConfused(true);
                     }
                     break;
@@ -193,14 +197,14 @@ public class Game {
                     break;
             }
             turn++;
-            if(turn == moveOrder.length) turn = 0;
-        }else{
+            if (turn == moveOrder.length) turn = 0;
+        } else {
             throw new Exception("This is not your turn.");
         }
 
     }
 
-    public void attackAnimal(Animal animal, Creature creature){
+    public void attackAnimal(Animal animal, Creature creature) {
 
     }
 
@@ -213,19 +217,19 @@ public class Game {
         }
     }
 
-    public Animal findPreviousAnimal(Animal animal){
-        if(animal.getName().equals("Rabbit")) return animals.get(animals.size() - 1);
+    public Animal findPreviousAnimal(Animal animal) {
+        if (animal.getName().equals("Rabbit")) return animals.get(animals.size() - 1);
         else return animals.get(animals.indexOf(animal) - 1);
     }
 
     //This method place animals randomly at row 0
-    private void placeAnimal(int randomCol, Animal animal, Square[][] board){
-        while(true){
+    private void placeAnimal(int randomCol, Animal animal, Square[][] board) {
+        while (true) {
             try {
                 //System.out.println("The random num is " + randomCol);
-                board[0][randomCol].setAnimal(animal);
+                board[19][randomCol].setAnimal(animal);
                 System.out.println(animal.getName() + "is at col： " + randomCol);
-            }catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 continue;
             }
@@ -235,13 +239,13 @@ public class Game {
     }
 
     //This method place creatures randomly excluding the first and the last row
-    private void placeCreature(int randomCol, int randomRow, Creature creature, Square[][] board){
-        while(true){
+    private void placeCreature(int randomCol, int randomRow, Creature creature, Square[][] board) {
+        while (true) {
             try {
                 //System.out.println("The randomCol is " + randomCol + " and randomRow is " + randomRow);
                 board[randomRow][randomCol].setCreature(creature);
                 //System.out.println("有怪物： " + board[randomRow][randomCol].isHasCreature());
-            }catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 continue;
             }
@@ -250,23 +254,22 @@ public class Game {
         }
     }
 
-    private void placeSpell(){
-
+    private void placeSpell() {
     }
 
-    public Creature nearCreature(Animal animal){
+    public Creature nearCreature(Animal animal) {
         int curRow = animal.getSquare(animal).getRow();
         int curCol = animal.getSquare(animal).getCol();
 
-        int[] dirRow = { -1, 0, 1, -1, 1, -1, 0, 1 };
-        int[] dirCol = { -1, -1, -1, 0, 0, 1, 1, 1 };
+        int[] dirRow = {-1, 0, 1, -1, 1, -1, 0, 1};
+        int[] dirCol = {-1, -1, -1, 0, 0, 1, 1, 1};
 
         for (int i = 0; i < 8; i++) {
             int adjacentRow = curRow + dirRow[i];
             int adjacentCol = curCol + dirCol[i];
-            if(isValidCoordinate(adjacentRow, adjacentRow)){
+            if (isValidCoordinate(adjacentRow, adjacentRow)) {
                 boolean hasCreature = this.board[adjacentRow][adjacentCol].isHasCreature();
-                if(hasCreature){
+                if (hasCreature) {
                     Coordinate coordinate = new Coordinate(adjacentRow, adjacentCol);
                     return (Creature) findAnimalByCoordinate(objectPosition, coordinate);
                 }

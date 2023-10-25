@@ -1,10 +1,11 @@
 package Animal;
 
+import Board.Game;
 import Board.Spell;
 
 import java.util.Map;
 
-public class Owl extends Animal{
+public class Owl extends Animal {
     public int lifePoints = 100;
     public String description = "Fox description";
 

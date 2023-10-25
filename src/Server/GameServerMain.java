@@ -1,26 +1,25 @@
+package Server;
+
 import Animal.Animal;
 import Board.Coordinate;
 import Board.Game;
 import Creature.*;
-import Animal.*;
 
 
 import javax.json.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import static Board.Game.*;
 
 public class GameServerMain {
+    public static long seed;
     public static void main(String[] args) {
+        seed = 1;
         int port = 8088; // 服务器端口
-        Game game = Game.getInstance(1);
+        Game game = Game.getInstance(seed);
         try {
             ServerSocket serverSocket = new ServerSocket(port);
             System.out.println("Server listening on port " + port);
@@ -38,7 +37,7 @@ public class GameServerMain {
     }
 
     private static void handleRequest(Socket clientSocket) {
-        Game game = Game.getInstance(1);
+        Game game = Game.getInstance(seed);
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
@@ -128,7 +127,7 @@ public class GameServerMain {
 
     // 实现获取游戏状态的方法
     private static String getGameData() {
-        //Game game = Game.getInstance(1);
+        Game game = Game.getInstance(1);
         //这个map存储了所有的有生物的坐标，如果一个格子有很多object怎么办？
         ArrayList<Coordinate> locationList = new ArrayList<>();
         for (Coordinate coordinate : objectPosition.values()) {
@@ -139,41 +138,43 @@ public class GameServerMain {
         //把board框架搭起来
         for (int row = 0; row < 20; row++) {
             JsonArrayBuilder rowBoard = Json.createArrayBuilder();
-            for (int col = 0; col < 20; col++) {
+             for (int col = 0; col < 20; col++) {
                 //如果当前坐标存在于map说明有生物
                 if(hasObject(row, col, locationList)){
+                    Animal animal = isAnimal(row, col);
+                    Creature creature = isCreature(row, col);
                     //需要考虑是否同时存在动物和spell
-                    if (isAnimal(row, col) != null && isCreature(row, col) != null){
+                    if (animal != null && creature != null){
                         JsonObjectBuilder cellDetailBuilder1 = Json.createObjectBuilder();
                         JsonObjectBuilder cellDetailBuilder2 = Json.createObjectBuilder();
-                        cellDetailBuilder1.add("name", isAnimal(row, col).getName())
+                        cellDetailBuilder1.add("name", animal.getName())
                                 .add("type", "Animal")
-                                .add("description", isAnimal(row, col).description)
-                                .add("life", isAnimal(row, col).lifePoints)
+                                .add("description", animal.getDescription())
+                                .add("life", animal.lifePoints)
                                 .add("spells", Json.createArrayBuilder());
-                        cellDetailBuilder2.add("name", isCreature(row, col).name)
+                        cellDetailBuilder2.add("name", creature.name)
                                 .add("type", "Creature")
-                                .add("shortName", isCreature(row, col).shortName)
-                                .add("description", isCreature(row, col).description)
-                                .add("attack", isCreature(row, col).attack)
+                                .add("shortName", creature.shortName)
+                                .add("description", creature.description)
+                                .add("attack", creature.attack)
                                 .add("confused", false)
                                 .add("charmed", Json.createArrayBuilder());
                         rowBoard.add(Json.createArrayBuilder().add(cellDetailBuilder1).add(cellDetailBuilder2));
-                    }else if(isAnimal(row, col) != null){
+                    }else if(animal != null){
                         JsonObjectBuilder cellDetailBuilder = Json.createObjectBuilder();
-                        cellDetailBuilder.add("name", isAnimal(row, col).getName())
+                        cellDetailBuilder.add("name", animal.getName())
                                 .add("type", "Animal")
-                                .add("description", isAnimal(row, col).getDescription())
-                                .add("life", isAnimal(row, col).getLifePoints())
+                                .add("description", animal.getDescription())
+                                .add("life", animal.getLifePoints())
                                 .add("spells", Json.createArrayBuilder());
                         rowBoard.add(Json.createArrayBuilder().add(cellDetailBuilder));
-                    }else if(isCreature(row, col) != null){
+                    }else if(creature != null){
                         JsonObjectBuilder cellDetailBuilder = Json.createObjectBuilder();
-                        cellDetailBuilder.add("name", isCreature(row, col).name)
+                        cellDetailBuilder.add("name", creature.name)
                                 .add("type", "Creature")
-                                .add("shortName", isCreature(row, col).shortName)
-                                .add("description", isCreature(row, col).description)
-                                .add("attack", isCreature(row, col).attack)
+                                .add("shortName", creature.shortName)
+                                .add("description", creature.description)
+                                .add("attack", creature.attack)
                                 .add("confused", false)
                                 .add("charmed", Json.createArrayBuilder());
                         rowBoard.add(Json.createArrayBuilder().add(cellDetailBuilder));
@@ -186,12 +187,18 @@ public class GameServerMain {
             board.add(rowBoard);
         }
 
+        String statusMessage = errorMessage != null ? errorMessage : "The last move was successful";
         JsonObjectBuilder gameBuilder = Json.createObjectBuilder()
                 .add("board", board)
                 .add("gameOver", false)
                 .add("currentAnimalTurn", "Rabbit")
-                .add("nextAnimalTurn", "Fox")
-                .add("status", "The last move was successful.");
+                .add("nextAnimalTurn", "Fox");
+                if(statusMessage == "The last move was successful"){
+                    gameBuilder.add("status", statusMessage);
+                }else{
+                    gameBuilder.add("status", "The last move was invalid.").add("extendedStatus", errorMessage);
+                }
+
         JsonObject gameJson = gameBuilder.build();
         String gameString = gameJson.toString();
         System.out.println(gameString);
@@ -209,17 +216,7 @@ public class GameServerMain {
     private static Animal isAnimal(int row, int col){
         for (Animal animal: animals) {
             if (objectPosition.get(animal).getRow() == row && objectPosition.get(animal).getCol() == col){
-                if (animal instanceof Badger) {
-                    return (Badger) animal;
-                } else if (animal instanceof Rabbit) {
-                    return (Rabbit) animal;
-                } else if (animal instanceof Fox) {
-                    return (Fox) animal;
-                } else if (animal instanceof Deer) {
-                    return (Deer) animal;
-                } else if (animal instanceof Owl) {
-                    return (Owl) animal;
-                }
+                return animal;
             }
         }
         return null;
@@ -228,38 +225,10 @@ public class GameServerMain {
     private static Creature isCreature(int row, int col){
         for (Creature creature: creatures) {
             if(objectPosition.get(creature).getRow() == row && objectPosition.get(creature).getCol() == col){
-                if (creature instanceof Unicorn) {
-                    return (Unicorn) creature;
-                } else if (creature instanceof Centaur) {
-                    return (Centaur) creature;
-                } else if (creature instanceof Dragon) {
-                    return (Dragon) creature;
-                } else if (creature instanceof Phoenix) {
-                    return (Phoenix) creature;
-                } else if (creature instanceof Sphinx) {
-                    return (Sphinx) creature;
-                }
+                return creature;
             }
         }
         return null;
-    }
-
-    private static void addAnimalDetail(JsonObjectBuilder cellDetailBuilder, Animal animal){
-        cellDetailBuilder.add("name", animal.getName())
-                .add("type", "Animal")
-                .add("description", animal.description)
-                .add("life", animal.lifePoints)
-                .add("spells", Json.createArrayBuilder());
-    }
-
-    private static void addCreatureDetail(JsonObjectBuilder cellDetailBuilder, Creature creature){
-        cellDetailBuilder.add("name", creature.name)
-                .add("type", "Creature")
-                .add("shortName", creature.shortName)
-                .add("description", creature.description)
-                .add("attack", creature.attack)
-                .add("confused", false)
-                .add("charmed", Json.createArrayBuilder());
     }
 
 //    private Spell isSpell(int row, int col){
@@ -271,10 +240,32 @@ public class GameServerMain {
 
     // 实现处理游戏动作的方法
     private static String processGameAction(String requestBody) {
+        Game game = Game.getInstance(seed);
         // 你需要实现这个方法，根据请求体的内容处理游戏动作，返回新的游戏状态的 JSON 数据
         // 例如: return "{\"gameState\": \"updated\"}";
-        return "{\"gameState\": \"updated\"}";
+        try{
+            // 解析请求体为 JSON 对象
+            JsonObject jsonRequest = Json.createReader(new StringReader(requestBody)).readObject();
+
+            // 提取请求中的动作、动物和目标坐标
+            String action = jsonRequest.getString("action");
+            String animalName = jsonRequest.getString("animal");
+            Animal animal = new Animal("tmp");
+            for (Animal a: animals) {
+                if(a.getName().equals(animalName)) animal = a;
+            }
+            JsonObject toSquare = jsonRequest.getJsonObject("toSquare");
+            int newRow = toSquare.getInt("row");
+            int newCol = toSquare.getInt("col");
+            game.moveAnimal(animal, objectPosition.get(animal).getRow(), objectPosition.get(animal).getCol(), newRow, newCol);
+            String newGameData = getGameData();
+            return newGameData;
+        }catch (Exception e) {
+            e.printStackTrace();
+            return "{\"error\": \"Invalid request\"}"; // 处理请求出错时返回错误信息
+        }
     }
+
 
     // 实现重置游戏的方法
     private static String resetGame() {

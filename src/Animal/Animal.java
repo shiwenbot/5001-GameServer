@@ -1,11 +1,16 @@
 package Animal;
 
-import Board.*;
+import Board.Coordinate;
+import Board.Game;
+import Board.Spell;
+import Board.Square;
 
 import java.util.HashMap;
 import java.util.Map;
 
+
 import static Board.Game.objectPosition;
+import static Server.GameServerMain.seed;
 
 
 public class Animal {
@@ -16,7 +21,6 @@ public class Animal {
 
     public Animal(String name) {
         this.name = name;
-        //System.out.println("Construct an animal.");
     }
 
     public boolean move(int oldRow, int oldCol, int newRow, int newCol) throws Exception {
@@ -24,7 +28,7 @@ public class Animal {
     }
 
     public Square getSquare(Animal animal){
-        Game game = Game.getInstance(1);
+        Game game = Game.getInstance(seed);
         Coordinate coordinate = objectPosition.get(animal);
         int row = coordinate.getRow();
         int col = coordinate.getCol();
@@ -48,5 +52,11 @@ public class Animal {
 
     public int getLifePoints() {
         return lifePoints;
+    }
+    //判断格子中是否已经有了怪物
+    public boolean withCreature(int row, int col){
+        Game game = Game.getInstance(seed);
+        if(game.getSquare(row, col).isHasCreature()) return true;
+        return false;
     }
 }
