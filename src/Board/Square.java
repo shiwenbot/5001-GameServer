@@ -4,6 +4,7 @@ import Animal.Animal;
 import Creature.*;
 
 import static Board.Game.objectPosition;
+import static Board.Game.spellPosition;
 
 
 public class Square {
@@ -11,6 +12,7 @@ public class Square {
     private int col;
     private boolean hasAnimal = false;
     private boolean hasCreature = false;
+    private boolean hasSpell = false;
     private boolean visible = false;
 
     Square(int row, int col){
@@ -24,7 +26,9 @@ public class Square {
         return hasAnimal;
     }
     public boolean isHasCreature() {return hasCreature;}
+    public boolean isHasSpell() {return hasSpell;}
     public void setHasAnimal(boolean bool){this.hasAnimal = bool;}
+    public void setHasSpell(boolean bool){this.hasSpell = bool;}
     //public void setHasCreature(boolean bool){this.hasCreature = bool;}
 
     //如果animal中的move通过了，就调用这个方法更改动物的位置，并更新hashmap的数据
@@ -50,6 +54,18 @@ public class Square {
             objectPosition.put(creature, coordinate);
             this.hasCreature = true;
             System.out.println( creature.name + "is at " + this.row + " " + this.col);
+        }
+    }
+
+    public void setSpell(Spell spell) throws Exception {
+        if (this.isHasSpell()){
+            throw new Exception("There is a spell in this Board.Square!");
+        }
+        else {
+            Coordinate coordinate = new Coordinate(this.row, this.col);
+            spellPosition.put(spell, coordinate);
+            this.hasSpell = true;
+            //System.out.println(spell.getType() + "is at " + this.row + " " + this.col);
         }
     }
 

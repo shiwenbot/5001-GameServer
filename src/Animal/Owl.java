@@ -9,6 +9,26 @@ import static Board.Game.errorMessage;
 import static Server.GameServerMain.seed;
 
 public class Owl extends Animal {
+    @Override
+    public void setLifePoints(int lifePoints) {
+        this.lifePoints = lifePoints;
+    }
+    public boolean isMoveable() {
+        return moveable;
+    }
+    public void setSpells(Map<Spell, Integer> spells, Spell spell) {
+        spells.put(spell, spells.getOrDefault(spell, 0) + 1);
+    }
+    @Override
+    public void setMoveable(boolean moveable) {
+        this.moveable = moveable;
+    }
+
+    @Override
+    public void setSpellable(boolean spellable) {
+        this.spellable = spellable;
+    }
+
     public int lifePoints = 100;
     public String description = "The owl has wings. The owl has prescription contact lenses but cannot put them on.";
     public String type = "Animal";

@@ -17,8 +17,9 @@ public class Game {
     public static String[] moveOrder = {"Rabbit", "Fox", "Deer", "Owl", "Badger"};
     private static List<Animal> shieldAnimal = new ArrayList<>();
     public static HashMap<Object, Coordinate> objectPosition = new HashMap<>();
+    public static HashMap<Spell, Coordinate> spellPosition = new HashMap<>();
     public static String errorMessage = null;
-
+    public static SpellType[] spells = {SpellType.DETECT, SpellType.HEAL, SpellType.SHIELD, SpellType.CONFUSE, SpellType.CHARM};
 
     public Rabbit rabbit;
     public Fox fox;
@@ -70,34 +71,29 @@ public class Game {
         creatures.add(sphinx);
 
         Random random = new Random(seed);
-        int randomCol, randomRow;
+        int randomIdx;
 
         //place Animals
         for (int i = 0; i < 5; i++) {
             switch (i) {
                 case 0: {
-                    randomCol = random.nextInt(20);
-                    placeAnimal(randomCol, rabbit, board);
+                    placeAnimal(random, rabbit, board);
                     break;
                 }
                 case 1: {
-                    randomCol = random.nextInt(20);
-                    placeAnimal(randomCol, fox, board);
+                    placeAnimal(random, fox, board);
                     break;
                 }
                 case 2: {
-                    randomCol = random.nextInt(20);
-                    placeAnimal(randomCol, deer, board);
+                    placeAnimal(random, deer, board);
                     break;
                 }
                 case 3: {
-                    randomCol = random.nextInt(20);
-                    placeAnimal(randomCol, owl, board);
+                    placeAnimal(random, owl, board);
                     break;
                 }
                 case 4: {
-                    randomCol = random.nextInt(20);
-                    placeAnimal(randomCol, badger, board);
+                    placeAnimal(random, badger, board);
                     break;
                 }
             }
@@ -107,51 +103,52 @@ public class Game {
         for (int i = 0; i < 5; i++) {
             switch (i) {
                 case 0: {
-                    randomRow = random.nextInt(18) + 1;//exclude the first and the last row
-                    randomCol = random.nextInt(20);
-                    placeCreature(randomRow, randomCol, unicorn, board);
+                    placeCreature(random, unicorn, board);
                     break;
                 }
                 case 1: {
-                    randomRow = random.nextInt(18) + 1;//exclude the first and the last row
-                    randomCol = random.nextInt(20);
-                    placeCreature(randomRow, randomCol, centaur, board);
+                    placeCreature(random, centaur, board);
                     break;
                 }
                 case 2: {
-                    randomRow = random.nextInt(18) + 1;//exclude the first and the last row
-                    randomCol = random.nextInt(20);
-                    placeCreature(randomRow, randomCol, dragon, board);
+                    placeCreature(random, dragon, board);
                     break;
                 }
                 case 3: {
-                    randomRow = random.nextInt(18) + 1;//exclude the first and the last row
-                    randomCol = random.nextInt(20);
-                    placeCreature(randomRow, randomCol, phoenix, board);
+                    placeCreature(random, phoenix, board);
                     break;
                 }
                 case 4: {
-                    randomRow = random.nextInt(18) + 1;//exclude the first and the last row
-                    randomCol = random.nextInt(20);
-                    placeCreature(randomRow, randomCol, sphinx, board);
+                    placeCreature(random, sphinx, board);
                     break;
                 }
             }
         }
 
-//        try {
-//            board[18][5].setCreature(phoenix);
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
+        //place spell
+        for (int i = 0; i < 10; i++) {
+            randomIdx = random.nextInt(5);
+            Spell spell = new Spell(spells[randomIdx]);
+            placeSpell(random, spell, board);
+        }
     }
 
     public void moveAnimal(Animal animal, int oldRow, int oldCol, int newRow, int newCol) throws Exception {
         if (animal.isMoveable() == true) {
-            endPreviousTurn(animal);
             //移动并更新moveable
             animal.move(oldRow, oldCol, newRow, newCol);
             animal.setMoveable(false);
+
+            //如果新格子有spell的话就捡起来
+            int curRow = objectPosition.get(animal).getRow();
+            int curCol = objectPosition.get(animal).getCol();
+            if(board[curRow][curCol].isHasSpell()){
+                animal.setSpells(animal.getSpells(), findSpellByCoordinate(spellPosition, curRow, curCol));
+                //把这个格子的spell移除
+                board[curCol][curCol].setHasSpell(false);
+            }
+
+            endPreviousTurn(animal);
 
             Animal nextAnimal = findNextAnimal(animal);
             nextAnimal.setMoveable(true);
@@ -168,28 +165,31 @@ public class Game {
             throw new Exception(errorMessage);
         }
     }
-    public void endPreviousTurn(Animal animal){
+
+    public void endPreviousTurn(Animal animal) {
         Animal preAnimal = findPreviousAnimal(animal);
         preAnimal.setSpellable(false);
-        if(preAnimal.withCreature(objectPosition.get(preAnimal).getRow(), objectPosition.get(preAnimal).getCol())){
+        if (preAnimal.withCreature(objectPosition.get(preAnimal).getRow(), objectPosition.get(preAnimal).getCol())) {
             Object creature = findCreatureByCoordinate(objectPosition, objectPosition.get(preAnimal).getRow(), objectPosition.get(preAnimal).getCol());
-            attackAnimal((Creature)creature, preAnimal);
+            attackAnimal((Creature) creature, preAnimal);
             System.out.println("Attack an animal successful!");
         }
         System.out.println("Update the turn successful!");
     }
-    public void attackAnimal(Creature creature, Animal animal){
+
+    public void attackAnimal(Creature creature, Animal animal) {
         int newLifePoints = animal.getLifePoints() - creature.getAttack();
         animal.setLifePoints(newLifePoints);
         if (animal.getLifePoints() < 0) animal.setLifePoints(0);
     }
 
-    public boolean gameOver(){
-        for(Animal animal : animals){
+    public boolean gameOver() {
+        for (Animal animal : animals) {
             if (animal.getLifePoints() == 0) return true;
         }
         return false;
     }
+
     public Square getSquare(int row, int col) {
         return board[row][col];
     }
@@ -249,16 +249,17 @@ public class Game {
         return animals.get(animals.indexOf(animal) - 1);
     }
 
-    private Animal findNextAnimal(Animal animal){
+    private Animal findNextAnimal(Animal animal) {
         if (animal.getName().equals("Badger")) return animals.get(0);
         return animals.get(animals.indexOf(animal) + 1);
     }
 
     //This method place animals randomly at row 0
-    private void placeAnimal(int randomCol, Animal animal, Square[][] board) {
+    private void placeAnimal(Random random, Animal animal, Square[][] board) {
         while (true) {
             try {
                 //System.out.println("The random num is " + randomCol);
+                int randomCol = random.nextInt(20);
                 board[19][randomCol].setAnimal(animal);
                 System.out.println(animal.getName() + "is at col： " + randomCol);
             } catch (Exception e) {
@@ -271,22 +272,32 @@ public class Game {
     }
 
     //This method place creatures randomly excluding the first and the last row
-    private void placeCreature(int randomCol, int randomRow, Creature creature, Square[][] board) {
+    private void placeCreature(Random random, Creature creature, Square[][] board) {
         while (true) {
             try {
-                //System.out.println("The randomCol is " + randomCol + " and randomRow is " + randomRow);
+                int randomRow = random.nextInt(18) + 1;//exclude the first and the last row
+                int randomCol = random.nextInt(20);
                 board[randomRow][randomCol].setCreature(creature);
-                //System.out.println("有怪物： " + board[randomRow][randomCol].isHasCreature());
             } catch (Exception e) {
                 e.printStackTrace();
                 continue;
             }
-            //System.out.println("This creature has been placed at row " + randomRow + " col " + randomCol);
             break;
         }
     }
 
-    private void placeSpell() {
+    private void placeSpell(Random random, Spell spell, Square[][] board) {
+        while (true) {
+            try {
+                int randomRow = random.nextInt(18) + 1;//exclude the first and the last row
+                int randomCol = random.nextInt(20);
+                board[randomRow][randomCol].setSpell(spell);
+            } catch (Exception e) {
+                e.printStackTrace();
+                continue;
+            }
+            break;
+        }
     }
 
     public Creature nearCreature(Animal animal) {
@@ -324,14 +335,27 @@ public class Game {
         }
         return null;
     }
-    private Object findCreatureByCoordinate(HashMap<Object, Coordinate> map, int row, int col) {for (Map.Entry<Object, Coordinate> entry : map.entrySet()) {
-        if (entry.getValue().getRow() == row && entry.getValue().getCol() == col) {
-            Object key = entry.getKey();
-            if (key instanceof Creature) {
-                return key;
+
+    private Object findCreatureByCoordinate(HashMap<Object, Coordinate> map, int row, int col) {
+        for (Map.Entry<Object, Coordinate> entry : map.entrySet()) {
+            if (entry.getValue().getRow() == row && entry.getValue().getCol() == col) {
+                Object key = entry.getKey();
+                if (key instanceof Creature) {
+                    return key;
+                }
             }
         }
+        return null;
     }
+    private Spell findSpellByCoordinate(HashMap<Spell, Coordinate> map, int row, int col) {
+        for (Map.Entry<Spell, Coordinate> entry : map.entrySet()) {
+            if (entry.getValue().getRow() == row && entry.getValue().getCol() == col) {
+                Spell key = entry.getKey();
+                if (key instanceof Spell) {
+                    return key;
+                }
+            }
+        }
         return null;
     }
 }

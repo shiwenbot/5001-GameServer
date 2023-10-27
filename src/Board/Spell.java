@@ -8,11 +8,9 @@ enum SpellType {
     CHARM
 }
 public class Spell {
-    private SpellType type;
+    public SpellType type;
 
     public Spell(SpellType type){
-        int n = 0;
-        System.out.println("This is the " + n + "th spell in this game");
         this.type = type;
     }
 

@@ -13,28 +13,52 @@ public class Fox extends Animal {
     public String description = "The fox has a bushy tail. The fox really enjoys looking at butterflies in the sunlight.";
     public boolean moveable = false;
     public boolean spellable = false;
+
+    public void setSpells(Map<Spell, Integer> spells, Spell spell) {
+        spells.put(spell, spells.getOrDefault(spell, 0) + 1);
+    }
+    public boolean isMoveable() {
+        return moveable;
+    }
+
+    @Override
+    public void setMoveable(boolean moveable) {
+        this.moveable = moveable;
+    }
+
+    @Override
+    public void setSpellable(boolean spellable) {
+        this.spellable = spellable;
+    }
+
     @Override
     public String getDescription() {
         return this.description;
     }
+
     @Override
     public String getName() {
         return name;
     }
+
     @Override
     public Map<Spell, Integer> getSpells() {
         return spells;
     }
+
     @Override
     public int getLifePoints() {
         return lifePoints;
     }
-    public Fox(String name) {
-        super(name);
-    }
+
     public void setLifePoints(int lifePoints) {
         this.lifePoints = lifePoints;
     }
+
+    public Fox(String name) {
+        super(name);
+    }
+
     @Override
     public boolean move(int oldRow, int oldCol, int newRow, int newCol) throws Exception {
         int rowMovement = Math.abs(oldRow - newRow);
@@ -42,7 +66,7 @@ public class Fox extends Animal {
 
         Game game = Game.getInstance(seed);
         //如果没有水平或竖直的走
-        if(rowMovement != 0 && colMovement != 0){
+        if (rowMovement != 0 && colMovement != 0) {
             errorMessage = "The fox can only move horizontally or vertically.";
             throw new Exception(errorMessage);
         }
@@ -50,21 +74,20 @@ public class Fox extends Animal {
         else if (rowMovement > 3 || colMovement > 3) {
             errorMessage = "The fox can only move 3 spaces horizontally or vertically.";
             throw new Exception(errorMessage);
-        }else if(game.board[newRow][newCol].isHasAnimal()){
+        } else if (game.board[newRow][newCol].isHasAnimal()) {
             errorMessage = "The fox cannot move because there is an animal in the way.";
             throw new Exception(errorMessage);
         }
         //跳两格
-        else if(rowMovement == 2 || colMovement == 2){
+        else if (rowMovement == 2 || colMovement == 2) {
             //竖直移动
-            if(rowMovement == 0){
-                if(withCreature(newRow, oldCol + (newCol - oldCol) / 2)){
+            if (rowMovement == 0) {
+                if (withCreature(newRow, oldCol + (newCol - oldCol) / 2)) {
                     game.getSquare(newRow, oldCol + (newCol - oldCol) / 2).setAnimal(this);
-                }else if(game.board[newRow][oldCol + (newCol - oldCol) / 2].isHasAnimal()){
+                } else if (game.board[newRow][oldCol + (newCol - oldCol) / 2].isHasAnimal()) {
                     errorMessage = "The fox cannot move because there is an animal in the way.";
                     throw new Exception(errorMessage);
-                }
-                else{
+                } else {
                     game.getSquare(newRow, newCol).setAnimal(this);
                 }
                 game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
@@ -72,14 +95,13 @@ public class Fox extends Animal {
             }
             //水平移动
             else if (colMovement == 0) {
-                if(withCreature(oldRow + (newRow - oldRow) / 2, newCol)){
+                if (withCreature(oldRow + (newRow - oldRow) / 2, newCol)) {
                     game.getSquare(oldRow + (newRow - oldRow) / 2, newCol).setAnimal(this);
                     game.getSquare(oldRow, oldCol).setHasAnimal(false);
-                }else if(game.board[oldRow + (newRow - oldRow) / 2][newCol].isHasAnimal()){
+                } else if (game.board[oldRow + (newRow - oldRow) / 2][newCol].isHasAnimal()) {
                     errorMessage = "The fox cannot move because there is an animal in the way.";
                     throw new Exception(errorMessage);
-                }
-                else{
+                } else {
                     game.getSquare(newRow, newCol).setAnimal(this);
                 }
                 game.getSquare(oldRow, oldCol).setHasAnimal(false);
@@ -87,33 +109,33 @@ public class Fox extends Animal {
             }
         }
         //跳三格
-        else if(rowMovement == 3 || colMovement == 3){
-            if (rowMovement == 0){
+        else if (rowMovement == 3 || colMovement == 3) {
+            if (rowMovement == 0) {
                 int tmpCol = newCol - oldCol > 0 ? oldCol + 2 : oldCol - 2;
                 int tmpCol1 = newCol - oldCol > 0 ? oldCol + 1 : oldCol - 1;
-                if (withCreature(newRow, tmpCol)){
+                if (withCreature(newRow, tmpCol)) {
                     game.getSquare(newRow, tmpCol).setAnimal(this);
                 } else if (withCreature(newRow, tmpCol1)) {
                     game.getSquare(newRow, tmpCol1).setAnimal(this);
                 } else if (game.board[newRow][tmpCol].isHasAnimal() || game.board[newRow][tmpCol1].isHasAnimal()) {
                     errorMessage = "The fox cannot move because there is an animal in the way.";
                     throw new Exception(errorMessage);
-                }else{
+                } else {
                     game.getSquare(newRow, newCol).setAnimal(this);
                 }
                 game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
                 return true;
-            }else if (colMovement == 0){
+            } else if (colMovement == 0) {
                 int tmpRow = newRow - oldRow > 0 ? oldRow + 2 : oldRow - 2;
                 int tmpRow1 = newRow - oldRow > 0 ? oldRow + 1 : oldRow - 1;
-                if(withCreature(tmpRow, newCol)){
+                if (withCreature(tmpRow, newCol)) {
                     game.getSquare(tmpRow, newCol).setAnimal(this);
                 } else if (withCreature(tmpRow1, newCol)) {
                     game.getSquare(tmpRow1, newCol).setAnimal(this);
                 } else if (game.board[tmpRow][newCol].isHasAnimal() || game.board[tmpRow1][newCol].isHasAnimal()) {
                     errorMessage = "The fox cannot move because there is an animal in the way.";
                     throw new Exception(errorMessage);
-                }else{
+                } else {
                     game.getSquare(newRow, newCol).setAnimal(this);
                 }
                 game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
@@ -121,7 +143,7 @@ public class Fox extends Animal {
             }
         }
         //走
-        else if(rowMovement == 1 || colMovement == 1){
+        else if (rowMovement == 1 || colMovement == 1) {
             game.getSquare(newRow, newCol).setAnimal(this);
             game.getSquare(oldRow, oldCol).setHasAnimal(false);
             return true;

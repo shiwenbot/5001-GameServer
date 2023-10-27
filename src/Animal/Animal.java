@@ -15,36 +15,34 @@ import static Server.GameServerMain.seed;
 
 public class Animal {
     public String name;
-
-    public String getType() {
-        return type;
-    }
-
     public String type = "Animal";
+
+    public void setSpells(Map<Spell, Integer> spells, Spell spell) {
+        spells.put(spell, spells.getOrDefault(spell, 0) + 1);
+    }
+
     public Map<Spell, Integer> spells = new HashMap<>();
-
-    public void setLifePoints(int lifePoints) {
-        this.lifePoints = lifePoints;
-    }
-
-    public int lifePoints;
-    public String description;
-
-    public void setMoveable(boolean moveable) {
-        this.moveable = moveable;
-    }
-
-    public void setSpellable(boolean spellable) {
-        this.spellable = spellable;
-    }
-
     public boolean moveable;
     public boolean spellable;
+    public int lifePoints;
 
+    public String description;
     public Animal(String name) {
         this.name = name;
     }
 
+    public void setLifePoints(int lifePoints) {
+        this.lifePoints = lifePoints;
+    }
+    public String getType() {
+        return type;
+    }
+    public void setMoveable(boolean moveable) {
+        this.moveable = moveable;
+    }
+    public void setSpellable(boolean spellable) {
+        this.spellable = spellable;
+    }
     public boolean move(int oldRow, int oldCol, int newRow, int newCol) throws Exception {
         return true;
     }

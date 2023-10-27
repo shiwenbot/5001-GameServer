@@ -14,6 +14,25 @@ public class Badger extends Animal {
     public boolean moveable = false;
     public boolean spellable = false;
     @Override
+    public void setLifePoints(int lifePoints) {
+        this.lifePoints = lifePoints;
+    }
+    public boolean isMoveable() {
+        return moveable;
+    }
+    @Override
+    public void setMoveable(boolean moveable) {
+        this.moveable = moveable;
+    }
+    @Override
+    public void setSpellable(boolean spellable) {
+        this.spellable = spellable;
+    }
+    public void setSpells(Map<Spell, Integer> spells, Spell spell) {
+        spells.put(spell, spells.getOrDefault(spell, 0) + 1);
+    }
+
+    @Override
     public String getDescription() {
         return this.description;
     }

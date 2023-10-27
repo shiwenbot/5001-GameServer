@@ -5,7 +5,6 @@ import Board.Coordinate;
 import Board.Game;
 import Creature.*;
 
-
 import javax.json.*;
 import java.io.*;
 import java.net.ServerSocket;
@@ -17,7 +16,7 @@ import static Board.Game.*;
 public class GameServerMain {
     public static long seed;
     public static void main(String[] args) {
-        seed = 1;
+        //seed = 1;
         int port = 8088; // 服务器端口
         Game game = Game.getInstance(seed);
         try {
@@ -86,7 +85,6 @@ public class GameServerMain {
                 // 不支持其他请求类型
                 sendResponse(out, 501, "Not Implemented");
             }
-
             // 关闭连接
             clientSocket.close();
         } catch (IOException e) {
@@ -235,13 +233,6 @@ public class GameServerMain {
         return null;
     }
 
-//    private Spell isSpell(int row, int col){
-//
-//    }
-
-
-
-
     // 实现处理游戏动作的方法
     private static String processGameAction(String requestBody) {
         Game game = Game.getInstance(seed);
@@ -275,6 +266,8 @@ public class GameServerMain {
     private static String resetGame() {
         // 你需要实现这个方法，重置游戏并返回新的游戏状态的 JSON 数据
         // 例如: return "{\"gameState\": \"reset\"}";
-        return "{\"gameState\": \"reset\"}";
+        Game game = Game.getInstance(seed);
+        String newGameData = getGameData();
+        return newGameData;
     }
 }

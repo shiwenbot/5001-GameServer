@@ -13,6 +13,24 @@ public class Deer extends Animal {
     public String description = "The deer has antlers. The deer is recently divorced and is looking for a new partner.";
     public boolean moveable = false;
     public boolean spellable = false;
+    public void setSpells(Map<Spell, Integer> spells, Spell spell) {
+        spells.put(spell, spells.getOrDefault(spell, 0) + 1);
+    }
+    @Override
+    public void setLifePoints(int lifePoints) {
+        this.lifePoints = lifePoints;
+    }
+    public boolean isMoveable() {
+        return moveable;
+    }
+    @Override
+    public void setMoveable(boolean moveable) {
+        this.moveable = moveable;
+    }
+    @Override
+    public void setSpellable(boolean spellable) {
+        this.spellable = spellable;
+    }
     @Override
     public String getDescription() {
         return this.description;
