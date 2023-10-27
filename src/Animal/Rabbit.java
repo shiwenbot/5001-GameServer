@@ -11,10 +11,21 @@ import static Board.Game.errorMessage;
 
 public class Rabbit extends Animal {
     public String name = "Rabbit";
+    public String type = "Animal";
     public Map<Spell, Integer> spells = new HashMap<>();
     public String description = "The rabbit has fluffy ears and tail. The rabbit really likes to eat grass.";
     public int lifePoints = 100;
 
+    public boolean isMoveable() {
+        return moveable;
+    }
+
+    public boolean isSpellable() {
+        return spellable;
+    }
+
+    public boolean moveable = true;
+    public boolean spellable = true;
     @Override
     public String getDescription() {
         return this.description;
@@ -71,6 +82,9 @@ public class Rabbit extends Animal {
                 //八个方向要一个一个判断吗？可以简化到判断3次，判断rowMovement，colMovement是否为0
                 if (withCreature(newRow, oldCol + (newCol - oldCol) / 2)){
                     game.getSquare(newRow, oldCol + (newCol - oldCol) / 2).setAnimal(this);
+                }else if(game.getSquare(newRow, oldCol + (newCol - oldCol) / 2).isHasAnimal()){
+                    errorMessage = "The rabbit cannot move because there is an animal in the way.";
+                    throw new Exception(errorMessage);
                 }
                 //或者第二步
                 else{
@@ -83,6 +97,9 @@ public class Rabbit extends Animal {
                 if(withCreature(oldRow + (newRow - oldRow) / 2, newCol)){
                     game.getSquare(oldRow + (newRow - oldRow) / 2, newCol).setAnimal(this);
                     game.getSquare(oldRow, oldCol).setHasAnimal(false);
+                }else if(game.board[oldRow + (newRow - oldRow) / 2][newCol].isHasAnimal()){
+                    errorMessage = "The rabbit cannot move because there is an animal in the way.";
+                    throw new Exception(errorMessage);
                 }
                 else{
                     game.getSquare(newRow, newCol).setAnimal(this);
@@ -109,13 +126,6 @@ public class Rabbit extends Animal {
         return false;
     }
 
-    //判断兔子是不是走的直线
-    public boolean isStraightLine(int oldRow, int oldCol, int newRow, int newCol){
-        int rowMovement = Math.abs(oldRow - newRow);
-        int colMovement = Math.abs(oldCol - newCol);
-        if((oldRow == newRow) || (oldCol == newCol) || (rowMovement == colMovement)){
-            return true;
-        }
-        else return false;
-    }
+
+
 }

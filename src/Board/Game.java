@@ -14,7 +14,7 @@ public class Game {
     public int turn = 0;
     public static List<Animal> animals = new ArrayList<>();
     public static List<Creature> creatures = new ArrayList<>();
-    private String[] moveOrder = {"Rabbit", "Fox", "Deer", "Owl", "Badger"};
+    public static String[] moveOrder = {"Rabbit", "Fox", "Deer", "Owl", "Badger"};
     private static List<Animal> shieldAnimal = new ArrayList<>();
     public static HashMap<Object, Coordinate> objectPosition = new HashMap<>();
     public static String errorMessage = null;
@@ -147,19 +147,49 @@ public class Game {
     }
 
     public void moveAnimal(Animal animal, int oldRow, int oldCol, int newRow, int newCol) throws Exception {
-        if (animal.getName().equals(moveOrder[turn])) {
+        if (animal.isMoveable() == true) {
+            endPreviousTurn(animal);
+            //移动并更新moveable
             animal.move(oldRow, oldCol, newRow, newCol);
+            animal.setMoveable(false);
+
+            Animal nextAnimal = findNextAnimal(animal);
+            nextAnimal.setMoveable(true);
+            nextAnimal.setSpellable(true);
+
             Animal preAnimal = findPreviousAnimal(animal);
-            if (shieldAnimal.contains(preAnimal)) {
-                shieldAnimal.remove(animal);
-            }
+//            if (shieldAnimal.contains(preAnimal)) {
+//                shieldAnimal.remove(animal);
+//            }
             turn++;
             if (turn == moveOrder.length) turn = 0;
         } else {
-            throw new Exception("You should move animals in order.");
+            errorMessage = "It is not " + animal.getName() + "'s turn.";
+            throw new Exception(errorMessage);
         }
     }
+    public void endPreviousTurn(Animal animal){
+        Animal preAnimal = findPreviousAnimal(animal);
+        preAnimal.setSpellable(false);
+        if(preAnimal.withCreature(objectPosition.get(preAnimal).getRow(), objectPosition.get(preAnimal).getCol())){
+            Object creature = findCreatureByCoordinate(objectPosition, objectPosition.get(preAnimal).getRow(), objectPosition.get(preAnimal).getCol());
+            attackAnimal((Creature)creature, preAnimal);
+            System.out.println("Attack an animal successful!");
+        }
+        System.out.println("Update the turn successful!");
+    }
+    public void attackAnimal(Creature creature, Animal animal){
+        int newLifePoints = animal.getLifePoints() - creature.getAttack();
+        animal.setLifePoints(newLifePoints);
+        if (animal.getLifePoints() < 0) animal.setLifePoints(0);
+    }
 
+    public boolean gameOver(){
+        for(Animal animal : animals){
+            if (animal.getLifePoints() == 0) return true;
+        }
+        return false;
+    }
     public Square getSquare(int row, int col) {
         return board[row][col];
     }
@@ -204,9 +234,6 @@ public class Game {
 
     }
 
-    public void attackAnimal(Animal animal, Creature creature) {
-
-    }
 
     /*The methods below are only used in Game class, so they should be private*/
     private void initializeBoard() {
@@ -219,7 +246,12 @@ public class Game {
 
     public Animal findPreviousAnimal(Animal animal) {
         if (animal.getName().equals("Rabbit")) return animals.get(animals.size() - 1);
-        else return animals.get(animals.indexOf(animal) - 1);
+        return animals.get(animals.indexOf(animal) - 1);
+    }
+
+    private Animal findNextAnimal(Animal animal){
+        if (animal.getName().equals("Badger")) return animals.get(0);
+        return animals.get(animals.indexOf(animal) + 1);
     }
 
     //This method place animals randomly at row 0
@@ -270,8 +302,7 @@ public class Game {
             if (isValidCoordinate(adjacentRow, adjacentRow)) {
                 boolean hasCreature = this.board[adjacentRow][adjacentCol].isHasCreature();
                 if (hasCreature) {
-                    Coordinate coordinate = new Coordinate(adjacentRow, adjacentCol);
-                    return (Creature) findAnimalByCoordinate(objectPosition, coordinate);
+                    return (Creature) findCreatureByCoordinate(objectPosition, adjacentRow, adjacentCol);
                 }
             }
         }
@@ -282,12 +313,25 @@ public class Game {
         return row >= 0 && row < ROW && col >= 0 && col < COL;
     }
 
-    private Object findAnimalByCoordinate(HashMap<Object, Coordinate> map, Coordinate coordinate) {
+    private Object findAnimalByCoordinate(HashMap<Object, Coordinate> map, int row, int col) {
         for (Map.Entry<Object, Coordinate> entry : map.entrySet()) {
-            if (entry.getValue().equals(coordinate)) {
-                return entry.getKey();
+            if (entry.getValue().getRow() == row && entry.getValue().getCol() == col) {
+                Object key = entry.getKey();
+                if (key instanceof Animal) {
+                    return key;
+                }
             }
         }
+        return null;
+    }
+    private Object findCreatureByCoordinate(HashMap<Object, Coordinate> map, int row, int col) {for (Map.Entry<Object, Coordinate> entry : map.entrySet()) {
+        if (entry.getValue().getRow() == row && entry.getValue().getCol() == col) {
+            Object key = entry.getKey();
+            if (key instanceof Creature) {
+                return key;
+            }
+        }
+    }
         return null;
     }
 }

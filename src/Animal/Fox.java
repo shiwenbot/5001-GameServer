@@ -11,7 +11,8 @@ import static Server.GameServerMain.seed;
 public class Fox extends Animal {
     public int lifePoints = 100;
     public String description = "The fox has a bushy tail. The fox really enjoys looking at butterflies in the sunlight.";
-
+    public boolean moveable = false;
+    public boolean spellable = false;
     @Override
     public String getDescription() {
         return this.description;
@@ -31,7 +32,9 @@ public class Fox extends Animal {
     public Fox(String name) {
         super(name);
     }
-
+    public void setLifePoints(int lifePoints) {
+        this.lifePoints = lifePoints;
+    }
     @Override
     public boolean move(int oldRow, int oldCol, int newRow, int newCol) throws Exception {
         int rowMovement = Math.abs(oldRow - newRow);
@@ -90,6 +93,8 @@ public class Fox extends Animal {
                 int tmpCol1 = newCol - oldCol > 0 ? oldCol + 1 : oldCol - 1;
                 if (withCreature(newRow, tmpCol)){
                     game.getSquare(newRow, tmpCol).setAnimal(this);
+                } else if (withCreature(newRow, tmpCol1)) {
+                    game.getSquare(newRow, tmpCol1).setAnimal(this);
                 } else if (game.board[newRow][tmpCol].isHasAnimal() || game.board[newRow][tmpCol1].isHasAnimal()) {
                     errorMessage = "The fox cannot move because there is an animal in the way.";
                     throw new Exception(errorMessage);
@@ -103,6 +108,8 @@ public class Fox extends Animal {
                 int tmpRow1 = newRow - oldRow > 0 ? oldRow + 1 : oldRow - 1;
                 if(withCreature(tmpRow, newCol)){
                     game.getSquare(tmpRow, newCol).setAnimal(this);
+                } else if (withCreature(tmpRow1, newCol)) {
+                    game.getSquare(tmpRow1, newCol).setAnimal(this);
                 } else if (game.board[tmpRow][newCol].isHasAnimal() || game.board[tmpRow1][newCol].isHasAnimal()) {
                     errorMessage = "The fox cannot move because there is an animal in the way.";
                     throw new Exception(errorMessage);

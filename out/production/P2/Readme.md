@@ -8,4 +8,4 @@
 creature是什么时候传？
 
 兔子跳的时候如果跨过了动物移动就会失败
-
+findObjectByCoordinate沒有处理当动物和怪物在一个格子的情况

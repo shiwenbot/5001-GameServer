@@ -5,27 +5,174 @@ import Board.Spell;
 
 import java.util.Map;
 
+import static Board.Game.errorMessage;
+import static Server.GameServerMain.seed;
+
 public class Owl extends Animal {
     public int lifePoints = 100;
-    public String description = "Fox description";
-
+    public String description = "The owl has wings. The owl has prescription contact lenses but cannot put them on.";
+    public String type = "Animal";
+    public boolean moveable = false;
+    public boolean spellable = false;
     @Override
     public String getDescription() {
         return this.description;
     }
+
     @Override
     public String getName() {
         return name;
     }
+
     @Override
     public Map<Spell, Integer> getSpells() {
         return spells;
     }
+
     @Override
     public int getLifePoints() {
         return lifePoints;
     }
+
     public Owl(String name) {
         super(name);
+    }
+
+    public boolean move(int oldRow, int oldCol, int newRow, int newCol) throws Exception {
+        int rowMovement = Math.abs(oldRow - newRow);
+        int colMovement = Math.abs(oldCol - newCol);
+
+        Game game = Game.getInstance(seed);
+        if (!isStraightLine(oldRow, oldCol, newRow, newCol)) {
+            errorMessage = "The owl can only move in a straight line.";
+            throw new Exception(errorMessage);
+        } else if (game.board[newRow][newCol].isHasAnimal()) {
+            errorMessage = "There is an animal in this square.";
+            throw new Exception(errorMessage);
+        }
+        //飞
+        else if (rowMovement > 1 || colMovement > 1) {
+            if (rowMovement == 0) {
+                int stepsLeft = colMovement;
+                //区别就是+1和-1
+                //移动成功后之前的格子就没有动物了
+                if (newCol - oldCol > 0) {
+                    for (int i = 1; i <= stepsLeft; i++) {
+                        if (withCreature(newRow, oldCol + i) && game.getSquare(newRow, oldCol + i).isHasAnimal()) {
+                            errorMessage = "The last move was invalid.";
+                            throw new Exception(errorMessage);
+                        } else if (withCreature(newRow, oldCol + i)) {
+                            game.getSquare(newRow, oldCol + i).setAnimal(this);
+                            game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
+                            return true;
+                        }
+                    }
+                } else {
+                    for (int i = 1; i <= stepsLeft; i++) {
+                        if (withCreature(newRow, oldCol - i) && game.getSquare(newRow, oldCol - i).isHasAnimal()) {
+                            errorMessage = "The last move was invalid.";
+                            throw new Exception(errorMessage);
+                        } else if (withCreature(newRow, oldCol - i)) {
+                            game.getSquare(newRow, oldCol - i).setAnimal(this);
+                            game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
+                            return true;
+                        }
+                    }
+                }
+                game.getSquare(newRow, newCol).setAnimal(this);
+                game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
+                return true;
+
+            } else if (colMovement == 0) {
+                int stepsLeft = rowMovement;
+                if (newRow - oldRow > 0) {
+                    for (int i = 1; i <= stepsLeft; i++) {
+                        if (withCreature(oldRow + i, newCol) && game.getSquare(oldRow + i, newCol).isHasAnimal()) {
+                            errorMessage = "The last move was invalid.";
+                            throw new Exception(errorMessage);
+                        } else if (withCreature(oldRow + i, newCol)) {
+                            game.getSquare(oldRow + i, newCol).setAnimal(this);
+                            game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
+                            return true;
+                        }
+                    }
+                } else {
+                    for (int i = 1; i <= stepsLeft; i++) {
+                        if (withCreature(oldRow - i, newCol) && game.getSquare(oldRow - i, newCol).isHasAnimal()) {
+                            errorMessage = "The last move was invalid.";
+                            throw new Exception(errorMessage);
+                        } else if (withCreature(oldRow - i, newCol)) {
+                            game.getSquare(oldRow - i, newCol).setAnimal(this);
+                            game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
+                            return true;
+                        }
+                    }
+                }
+                game.getSquare(newRow, newCol).setAnimal(this);
+                game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
+                return true;
+            }
+            else {
+                if (rowMovement > 0 && colMovement > 0){
+                    int stepsLeft = colMovement;
+                    for (int i = 1; i <= stepsLeft; i++){
+                        if (withCreature(oldRow + i, oldCol + i) && game.getSquare(oldRow + i, oldCol + i).isHasAnimal()){
+                            errorMessage = "The last move was invalid.";
+                            throw new Exception(errorMessage);
+                        } else if (withCreature(oldRow + i, oldCol + i)) {
+                            game.getSquare(oldRow + i, oldCol + i).setAnimal(this);
+                            game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
+                            return true;
+                        }
+                    }
+                } else if (rowMovement > 0 && colMovement < 0) {
+                    int stepsLeft = colMovement;
+                    for (int i = 1; i <= stepsLeft; i++){
+                        if (withCreature(oldRow + i, oldCol - i) && game.getSquare(oldRow + i, oldCol - i).isHasAnimal()){
+                            errorMessage = "The last move was invalid.";
+                            throw new Exception(errorMessage);
+                        } else if (withCreature(oldRow + i, oldCol - i)) {
+                            game.getSquare(oldRow + i, oldCol - i).setAnimal(this);
+                            game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
+                            return true;
+                        }
+                    }
+                } else if (rowMovement < 0 && colMovement > 0) {
+                    int stepsLeft = colMovement;
+                    for (int i = 1; i <= stepsLeft; i++){
+                        if (withCreature(oldRow - i, oldCol + i) && game.getSquare(oldRow - i, oldCol + i).isHasAnimal()){
+                            errorMessage = "The last move was invalid.";
+                            throw new Exception(errorMessage);
+                        } else if (withCreature(oldRow - i, oldCol + i)) {
+                            game.getSquare(oldRow - i, oldCol + i).setAnimal(this);
+                            game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
+                            return true;
+                        }
+                    }
+                }else if (rowMovement< 0 && colMovement < 0){
+                    int stepsLeft = colMovement;
+                    for (int i = 1; i <= stepsLeft; i++){
+                        if (withCreature(oldRow - i, oldCol - i) && game.getSquare(oldRow - i, oldCol - i).isHasAnimal()){
+                            errorMessage = "The last move was invalid.";
+                            throw new Exception(errorMessage);
+                        } else if (withCreature(oldRow - i, oldCol - i)) {
+                            game.getSquare(oldRow - i, oldCol - i).setAnimal(this);
+                            game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
+                            return true;
+                        }
+                    }
+                }
+                game.getSquare(newRow, newCol).setAnimal(this);
+                game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
+                return true;
+            }
+        }
+        //走
+        else if(rowMovement == 1 || colMovement == 1){
+            game.getSquare(newRow, newCol).setAnimal(this);
+            game.getSquare(oldRow, oldCol).setHasAnimal(false);
+            return true;
+        }
+        return false;
     }
 }

@@ -150,7 +150,7 @@ public class GameServerMain {
                         cellDetailBuilder1.add("name", animal.getName())
                                 .add("type", "Animal")
                                 .add("description", animal.getDescription())
-                                .add("life", animal.lifePoints)
+                                .add("life", animal.getLifePoints())
                                 .add("spells", Json.createArrayBuilder());
                         cellDetailBuilder2.add("name", creature.name)
                                 .add("type", "Creature")
@@ -188,11 +188,12 @@ public class GameServerMain {
         }
 
         String statusMessage = errorMessage != null ? errorMessage : "The last move was successful";
+
         JsonObjectBuilder gameBuilder = Json.createObjectBuilder()
                 .add("board", board)
                 .add("gameOver", false)
-                .add("currentAnimalTurn", "Rabbit")
-                .add("nextAnimalTurn", "Fox");
+                .add("currentAnimalTurn", moveOrder[game.turn])
+                .add("nextAnimalTurn", findNextAnimal(game.turn, moveOrder) );
                 if(statusMessage == "The last move was successful"){
                     gameBuilder.add("status", statusMessage);
                 }else{
@@ -201,7 +202,7 @@ public class GameServerMain {
 
         JsonObject gameJson = gameBuilder.build();
         String gameString = gameJson.toString();
-        System.out.println(gameString);
+        //System.out.println(gameString);
         return gameString;
     }
 
@@ -212,7 +213,10 @@ public class GameServerMain {
         }
         return false;
     }
-
+    private static String findNextAnimal(int turn, String[] moveOrder){
+        if (moveOrder[turn].equals("Badger")) return "Rabbit";
+        return moveOrder[turn + 1];
+    }
     private static Animal isAnimal(int row, int col){
         for (Animal animal: animals) {
             if (objectPosition.get(animal).getRow() == row && objectPosition.get(animal).getCol() == col){

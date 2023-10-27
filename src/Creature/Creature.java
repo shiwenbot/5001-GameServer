@@ -6,6 +6,12 @@ public class Creature {
     public String shortName;
     public int attack;
     public String description;
+
+    public String getType() {
+        return type;
+    }
+
+    public String type = "Creature";
     private boolean confused;
     public String getName() {
         return name;
