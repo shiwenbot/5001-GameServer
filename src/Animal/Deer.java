@@ -16,6 +16,9 @@ public class Deer extends Animal {
     public void setSpells(Map<Spell, Integer> spells, Spell spell) {
         spells.put(spell, spells.getOrDefault(spell, 0) + 1);
     }
+    public void heal(){
+        this.lifePoints += 10;
+    }
     @Override
     public void setLifePoints(int lifePoints) {
         this.lifePoints = lifePoints;

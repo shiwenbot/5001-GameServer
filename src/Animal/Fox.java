@@ -40,7 +40,9 @@ public class Fox extends Animal {
     public String getName() {
         return name;
     }
-
+    public void heal(){
+        this.lifePoints += 10;
+    }
     @Override
     public Map<Spell, Integer> getSpells() {
         return spells;

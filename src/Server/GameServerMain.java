@@ -3,6 +3,7 @@ package Server;
 import Animal.Animal;
 import Board.Coordinate;
 import Board.Game;
+import Board.Spell;
 import Creature.*;
 
 import javax.json.*;
@@ -241,18 +242,29 @@ public class GameServerMain {
         try{
             // 解析请求体为 JSON 对象
             JsonObject jsonRequest = Json.createReader(new StringReader(requestBody)).readObject();
-
-            // 提取请求中的动作、动物和目标坐标
             String action = jsonRequest.getString("action");
-            String animalName = jsonRequest.getString("animal");
-            Animal animal = new Animal("tmp");
-            for (Animal a: animals) {
-                if(a.getName().equals(animalName)) animal = a;
+            // 提取请求中的动作、动物和目标坐标
+            if (action.equals("move")){
+                String animalName = jsonRequest.getString("animal");
+                Animal animal = new Animal("tmp");
+                for (Animal a: animals) {
+                    if(a.getName().equals(animalName)) animal = a;
+                }
+                JsonObject toSquare = jsonRequest.getJsonObject("toSquare");
+                int newRow = toSquare.getInt("row");
+                int newCol = toSquare.getInt("col");
+                game.moveAnimal(animal, objectPosition.get(animal).getRow(), objectPosition.get(animal).getCol(), newRow, newCol);
+            } else if (action.equals("spell")) {
+                String animalName = jsonRequest.getString("animal");
+                String spellName = jsonRequest.getString("spell");
+                //获取动物和法术
+                Animal animal = new Animal("tmp");
+                for (Animal a: animals) {
+                    if(a.getName().equals(animalName)) animal = a;
+                }
+                Spell spell = Spell.createSpell(spellName);
+                game.castSpell(animal, spell);
             }
-            JsonObject toSquare = jsonRequest.getJsonObject("toSquare");
-            int newRow = toSquare.getInt("row");
-            int newCol = toSquare.getInt("col");
-            game.moveAnimal(animal, objectPosition.get(animal).getRow(), objectPosition.get(animal).getCol(), newRow, newCol);
             String newGameData = getGameData();
             return newGameData;
         }catch (Exception e) {

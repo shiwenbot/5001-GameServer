@@ -13,21 +13,30 @@ public class Badger extends Animal {
     public String description = "The badger has a black and white face. The badger is a often mistaken for a very small panda. The badger wears a t-shirt that says ¡°I am not a panda¡± to combat this.";
     public boolean moveable = false;
     public boolean spellable = false;
+
+    public void heal() {
+        this.lifePoints += 10;
+    }
+
     @Override
     public void setLifePoints(int lifePoints) {
         this.lifePoints = lifePoints;
     }
+
     public boolean isMoveable() {
         return moveable;
     }
+
     @Override
     public void setMoveable(boolean moveable) {
         this.moveable = moveable;
     }
+
     @Override
     public void setSpellable(boolean spellable) {
         this.spellable = spellable;
     }
+
     public void setSpells(Map<Spell, Integer> spells, Spell spell) {
         spells.put(spell, spells.getOrDefault(spell, 0) + 1);
     }
@@ -89,7 +98,7 @@ public class Badger extends Animal {
             }
         }
         //×ß
-        else if(rowMovement == 1 || colMovement == 1){
+        else if (rowMovement == 1 || colMovement == 1) {
             game.getSquare(newRow, newCol).setAnimal(this);
             game.getSquare(oldRow, oldCol).setHasAnimal(false);
             return true;

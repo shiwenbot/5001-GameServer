@@ -9,6 +9,11 @@ import static Board.Game.errorMessage;
 import static Server.GameServerMain.seed;
 
 public class Owl extends Animal {
+    public int lifePoints = 100;
+    public String description = "The owl has wings. The owl has prescription contact lenses but cannot put them on.";
+    public String type = "Animal";
+    public boolean moveable = false;
+    public boolean spellable = false;
     @Override
     public void setLifePoints(int lifePoints) {
         this.lifePoints = lifePoints;
@@ -29,16 +34,13 @@ public class Owl extends Animal {
         this.spellable = spellable;
     }
 
-    public int lifePoints = 100;
-    public String description = "The owl has wings. The owl has prescription contact lenses but cannot put them on.";
-    public String type = "Animal";
-    public boolean moveable = false;
-    public boolean spellable = false;
     @Override
     public String getDescription() {
         return this.description;
     }
-
+    public void heal(){
+        this.lifePoints += 10;
+    }
     @Override
     public String getName() {
         return name;

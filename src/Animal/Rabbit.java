@@ -45,7 +45,9 @@ public class Rabbit extends Animal {
     }
 
 
-
+    public void heal(){
+        this.lifePoints += 10;
+    }
     @Override
     public String getDescription() {
         return this.description;

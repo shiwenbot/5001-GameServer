@@ -142,39 +142,73 @@ public class Game {
             //如果新格子有spell的话就捡起来
             int curRow = objectPosition.get(animal).getRow();
             int curCol = objectPosition.get(animal).getCol();
-            if(board[curRow][curCol].isHasSpell()){
+            if (board[curRow][curCol].isHasSpell()) {
                 animal.setSpells(animal.getSpells(), findSpellByCoordinate(spellPosition, curRow, curCol));
                 //把这个格子的spell移除
                 board[curCol][curCol].setHasSpell(false);
             }
+            //更新一下可见性
+            board[curCol][curCol].changeVisibile(true);
 
+            //结算上一回合
             endPreviousTurn(animal);
 
             Animal nextAnimal = findNextAnimal(animal);
             nextAnimal.setMoveable(true);
             nextAnimal.setSpellable(true);
-
-            Animal preAnimal = findPreviousAnimal(animal);
-//            if (shieldAnimal.contains(preAnimal)) {
-//                shieldAnimal.remove(animal);
-//            }
-            turn++;
-            if (turn == moveOrder.length) turn = 0;
+            //把turn更新到下一个
+            turn = getIndexForAnimal(nextAnimal.getName());
+            //更新怪物的confused状态
+            for (Creature creature : creatures){
+                if (creature.getConfusedTurnLeft() != 0){
+                    creature.setConfusedTurnLeft(creature.getConfusedTurnLeft() - 1);
+                    //如果更新后为零了那么就更新一下怪物的状态
+                    if (creature.getConfusedTurnLeft() == 0){
+                        creature.setConfused(false);
+                    }
+                }
+            }
+            //更新怪物的chamed状态
+            for (Creature creature : creatures){
+                if (creature.getChamAnimal() != null){
+                    creature.updateChamAnimal();
+                }
+            }
         } else {
             errorMessage = "It is not " + animal.getName() + "'s turn.";
             throw new Exception(errorMessage);
         }
     }
 
+    public int getIndexForAnimal(String animalName) {
+        for (int i = 0; i < moveOrder.length; i++) {
+            if (moveOrder[i].equals(animalName)) {
+                return i;  // 返回索引
+            }
+        }
+        return -1;  // 如果未找到，返回-1或其他适当的值
+    }
+
     public void endPreviousTurn(Animal animal) {
         Animal preAnimal = findPreviousAnimal(animal);
+        //下个动物移动了以后上一个动物就不可以用spell了，但是如果还没移动的话就可以
         preAnimal.setSpellable(false);
-        if (preAnimal.withCreature(objectPosition.get(preAnimal).getRow(), objectPosition.get(preAnimal).getCol())) {
-            Object creature = findCreatureByCoordinate(objectPosition, objectPosition.get(preAnimal).getRow(), objectPosition.get(preAnimal).getCol());
-            attackAnimal((Creature) creature, preAnimal);
-            System.out.println("Attack an animal successful!");
+        Creature creature = (Creature)findCreatureByCoordinate(objectPosition, objectPosition.get(preAnimal).getRow(), objectPosition.get(preAnimal).getCol());
+        if (creature != null && !shieldAnimal.contains(preAnimal)) {
+            //如果眩晕了就不攻击了，直接返回
+            if (creature.isConfused() == true) {
+                System.out.println("Debug : " + creature.getName() + " is confused!");
+            }else if (creature.getChamAnimal().containsKey(animal)){
+                System.out.println("Debug : " + creature.getName() + " is charmed!");
+            }
+            attackAnimal(creature, preAnimal);
+            System.out.println("Debug : " + creature.getName() + " attack an animal successful!");
         }
-        System.out.println("Update the turn successful!");
+        //如果有护盾那么就不攻击
+        else if (shieldAnimal.contains(preAnimal)) {
+            shieldAnimal.remove(animal);
+        }
+        System.out.println("Debug : Update the turn successful!");
     }
 
     public void attackAnimal(Creature creature, Animal animal) {
@@ -195,9 +229,10 @@ public class Game {
     }
 
     public void castSpell(Animal animal, Spell spell) throws Exception {
-        if (animal.getName().equals(moveOrder[turn])) {
+        int previousTurn = (turn - 1 + moveOrder.length) % moveOrder.length;
+        if (animal.getName().equals(moveOrder[turn]) || animal.getName().equals(moveOrder[previousTurn])) {
             SpellType spellType = spell.getType();
-
+            Creature creature = nearCreature(animal);
             switch (spellType) {
                 case DETECT:
                     int curRow = animal.getSquare(animal).getRow();
@@ -211,6 +246,7 @@ public class Game {
                         int adjacentCol = curCol + dirCol[i];
                         this.board[adjacentRow][adjacentCol].changeVisibile(true);
                     }
+                    animal.getSpells().put(spell, animal.getSpells().get(spell) - 1);
                     break;
                 case HEAL:
                     animal.heal();
@@ -219,15 +255,21 @@ public class Game {
                     shieldAnimal.add(animal);
                 case CONFUSE:
                     //如果有的话，先返回这个怪物，让它中招一个回合
-                    if (nearCreature(animal) != null) {
-                        nearCreature(animal).setConfused(true);
+                    if (creature!= null) {
+                        creature.setConfused(true);
+                        creature.setConfusedTurnLeft(5);
                     }
                     break;
                 case CHARM:
+                    if (creature != null) {
+                        creature.setCharmed(true);
+                        creature.addChamAnimal(animal);
+                    }
                     break;
             }
             turn++;
             if (turn == moveOrder.length) turn = 0;
+            animal.setSpellable(false);
         } else {
             throw new Exception("This is not your turn.");
         }
@@ -347,6 +389,7 @@ public class Game {
         }
         return null;
     }
+
     private Spell findSpellByCoordinate(HashMap<Spell, Coordinate> map, int row, int col) {
         for (Map.Entry<Spell, Coordinate> entry : map.entrySet()) {
             if (entry.getValue().getRow() == row && entry.getValue().getCol() == col) {
