@@ -17,7 +17,7 @@ import static Board.Game.*;
 public class GameServerMain {
     public static long seed;
     public static void main(String[] args) {
-        //seed = 1;
+        seed = 1;
         int port = 8088; // 服务器端口
         Game game = Game.getInstance(seed);
         try {
@@ -149,13 +149,23 @@ public class GameServerMain {
                         cellDetailBuilder1.add("name", animal.getName())
                                 .add("type", "Animal")
                                 .add("description", animal.getDescription())
-                                .add("life", animal.getLifePoints())
-                                .add("spells", Json.createArrayBuilder());
+                                .add("life", animal.getLifePoints());
+                        JsonArrayBuilder spellDetails = Json.createArrayBuilder();
+                        for (Spell spell : spells){
+                            if (animal.getSpells().containsKey(spell)){
+                                spellDetails.add(Json.createObjectBuilder()
+                                        .add("name", spell.getType())
+                                        .add("description", spell.getDescription())
+                                        .add("amount", animal.getSpells().get(spell)));
+                            }
+                        }
+                        cellDetailBuilder1.add("spells", spellDetails);
+
                         cellDetailBuilder2.add("name", creature.name)
                                 .add("type", "Creature")
-                                .add("shortName", creature.shortName)
-                                .add("description", creature.description)
-                                .add("attack", creature.attack)
+                                .add("shortName", creature.getShortName())
+                                .add("description", creature.getDescription())
+                                .add("attack", creature.getAttack())
                                 .add("confused", false)
                                 .add("charmed", Json.createArrayBuilder());
                         rowBoard.add(Json.createArrayBuilder().add(cellDetailBuilder1).add(cellDetailBuilder2));
@@ -164,19 +174,30 @@ public class GameServerMain {
                         cellDetailBuilder.add("name", animal.getName())
                                 .add("type", "Animal")
                                 .add("description", animal.getDescription())
-                                .add("life", animal.getLifePoints())
-                                .add("spells", Json.createArrayBuilder());
+                                .add("life", animal.getLifePoints());
+                        JsonArrayBuilder spellDetails = Json.createArrayBuilder();
+                        for (Spell spell : spells){
+                            if (animal.getSpells().containsKey(spell)){
+                                spellDetails.add(Json.createObjectBuilder()
+                                        .add("name", spell.getType())
+                                        .add("description", spell.getDescription())
+                                        .add("amount", animal.getSpells().get(spell)));
+                            }
+                        }
+                        cellDetailBuilder.add("spells", spellDetails);
                         rowBoard.add(Json.createArrayBuilder().add(cellDetailBuilder));
-                    }else if(creature != null){
+                    }else if(creature != null && game.board[row][col].isVisible()){
                         JsonObjectBuilder cellDetailBuilder = Json.createObjectBuilder();
                         cellDetailBuilder.add("name", creature.name)
                                 .add("type", "Creature")
-                                .add("shortName", creature.shortName)
-                                .add("description", creature.description)
-                                .add("attack", creature.attack)
+                                .add("shortName", creature.getShortName())
+                                .add("description", creature.getDescription())
+                                .add("attack", creature.getAttack())
                                 .add("confused", false)
                                 .add("charmed", Json.createArrayBuilder());
                         rowBoard.add(Json.createArrayBuilder().add(cellDetailBuilder));
+                    } else {
+                        rowBoard.add(Json.createArrayBuilder());
                     }
                 }
                 else {
@@ -187,18 +208,39 @@ public class GameServerMain {
         }
 
         String statusMessage = errorMessage != null ? errorMessage : "The last move was successful";
+        String turnType = null;
+        Animal animal = null;
+        for (Animal a : animals){
+            if (a.getName().equals(moveOrder[game.turn])){
+                animal = a;
+            }
+        }
+        Animal preAnimal = findPreviousAnimal(animal);
+
+        if (preAnimal.isSpellable() && !preAnimal.isMoveable()){
+            turnType = "spell";
+        } else turnType = "move";
+
+        String currentAnimalTurn = null;
+        if (turnType.equals("spell")){
+            currentAnimalTurn = preAnimal.getName();
+        }else {
+            currentAnimalTurn = moveOrder[game.turn];
+        }
+
+        String nextAnimalTurn = getNextAnimal(currentAnimalTurn);
 
         JsonObjectBuilder gameBuilder = Json.createObjectBuilder()
                 .add("board", board)
                 .add("gameOver", false)
-                .add("currentAnimalTurn", moveOrder[game.turn])
-                .add("nextAnimalTurn", findNextAnimal(game.turn, moveOrder) );
+                .add("currentAnimalTurn", currentAnimalTurn)
+                .add("nextAnimalTurn", nextAnimalTurn);
                 if(statusMessage == "The last move was successful"){
                     gameBuilder.add("status", statusMessage);
                 }else{
                     gameBuilder.add("status", "The last move was invalid.").add("extendedStatus", errorMessage);
+                    errorMessage = null;
                 }
-
         JsonObject gameJson = gameBuilder.build();
         String gameString = gameJson.toString();
         //System.out.println(gameString);
@@ -258,11 +300,14 @@ public class GameServerMain {
                 String animalName = jsonRequest.getString("animal");
                 String spellName = jsonRequest.getString("spell");
                 //获取动物和法术
-                Animal animal = new Animal("tmp");
+                Animal animal = null;
+                Spell spell = null;
                 for (Animal a: animals) {
                     if(a.getName().equals(animalName)) animal = a;
                 }
-                Spell spell = Spell.createSpell(spellName);
+                for (Spell s : spells){
+                    if (s.getType().equals(spellName)) spell = s;
+                }
                 game.castSpell(animal, spell);
             }
             String newGameData = getGameData();

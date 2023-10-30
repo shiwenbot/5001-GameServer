@@ -1,15 +1,43 @@
 package Creature;
 
+import Animal.Animal;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 public class Sphinx extends Creature{
-    public String name;
-    public String shortName;
-    public int attack;
-    public String description;
+    public String name = "Sassy Sphinx";
+    public String shortName = "SS";
+    public int attack = 21;
+    public String description = "The SS is a sphinx that is very sassy. The sphinx is very good at giving sarcastic answers to questions.";
     public boolean confused;
     public boolean charmed;
     public String type = "Creature";
     public int confusedTurnLeft = 0;
     public int charmedTurnLeft = 0;
+    public HashMap<Animal, Integer> chamAnimal = new HashMap<>();
+    @Override
+    public String getName() {
+        return name;
+    }
+    public HashMap<Animal, Integer> getChamAnimal() {
+        return chamAnimal;
+    }
+    @Override
+    public String getShortName() {
+        return shortName;
+    }
+
+    @Override
+    public int getAttack() {
+        return attack;
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
+    }
 
     @Override
     public boolean isCharmed() {
@@ -35,7 +63,26 @@ public class Sphinx extends Creature{
     public int getCharmedTurnLeft() {
         return charmedTurnLeft;
     }
+    public void updateChamAnimal(){
+        // 创建一个迭代器以遍历 HashMap 的键
+        Iterator<Map.Entry<Animal, Integer>> iterator = chamAnimal.entrySet().iterator();
 
+        while (iterator.hasNext()) {
+            Map.Entry<Animal, Integer> entry = iterator.next();
+            int updatedValue = entry.getValue() - 1;
+
+            if (updatedValue == 0) {
+                // 值为0或更小，移除键
+                iterator.remove();
+            } else {
+                // 更新键对应的值
+                chamAnimal.put(entry.getKey(), updatedValue);
+            }
+        }
+    }
+    public void addChamAnimal(Animal animal){
+        chamAnimal.put(animal, 16);
+    }
     @Override
     public void setCharmedTurnLeft(int charmedTurnLeft) {
         this.charmedTurnLeft = charmedTurnLeft;
@@ -45,7 +92,7 @@ public class Sphinx extends Creature{
     public Sphinx(String name) {
         super(name);
         shortName = "SS";
-        attack = 10;
+        attack = 21;
         description = "The SS is a sphinx that is very sassy. The sphinx is very good at giving sarcastic answers to questions.";
     }
     public boolean isConfused(){

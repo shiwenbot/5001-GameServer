@@ -3,6 +3,8 @@ package Board;
 import Animal.Animal;
 import Creature.*;
 
+import java.util.ArrayList;
+
 import static Board.Game.objectPosition;
 import static Board.Game.spellPosition;
 
@@ -63,7 +65,7 @@ public class Square {
         }
         else {
             Coordinate coordinate = new Coordinate(this.row, this.col);
-            spellPosition.put(spell, coordinate);
+            spellPosition.computeIfAbsent(spell, k -> new ArrayList<>()).add(coordinate);
             this.hasSpell = true;
             //System.out.println(spell.getType() + "is at " + this.row + " " + this.col);
         }

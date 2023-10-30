@@ -21,7 +21,7 @@ public class Creature {
         return chamAnimal;
     }
     public void addChamAnimal(Animal animal){
-        chamAnimal.put(animal, 15);
+        chamAnimal.put(animal, 16);
     }
     public void updateChamAnimal(){
         // 创建一个迭代器以遍历 HashMap 的键

@@ -21,7 +21,7 @@ public class Animal {
         spells.put(spell, spells.getOrDefault(spell, 0) + 1);
     }
 
-    public Map<Spell, Integer> spells = new HashMap<>();
+    public HashMap<Spell, Integer> spells = new HashMap<>();
     public boolean moveable;
     public boolean spellable;
     public int lifePoints;
