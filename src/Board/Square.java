@@ -21,9 +21,6 @@ public class Square {
         this.row = row;
         this.col = col;
     }
-    /*
-    * 1.一个格子只能有一个动物，或者一个动物和怪物
-    * */
     public boolean isHasAnimal(){
         return hasAnimal;
     }
@@ -31,10 +28,24 @@ public class Square {
     public boolean isHasSpell() {return hasSpell;}
     public void setHasAnimal(boolean bool){this.hasAnimal = bool;}
     public void setHasSpell(boolean bool){this.hasSpell = bool;}
-    //public void setHasCreature(boolean bool){this.hasCreature = bool;}
+    public boolean isVisible(){
+        return visible;
+    }
+    public void changeVisibile(boolean bool){
+        this.visible = bool;
+    }
+    public int getRow() {
+        return this.row;
+    }
+    public int getCol() {
+        return this.col;
+    }
 
-    //如果animal中的move通过了，就调用这个方法更改动物的位置，并更新hashmap的数据
-    //初始化的时候也会调用
+    /**
+     * This method sets the animal in this square
+     * This method will be call in move and when initialising board
+     * an exception will be thrown when there is already an animal
+     * */
     public void setAnimal(Animal animal) throws Exception {
         if(this.isHasAnimal()){
             throw new Exception("There is an animal in this Board.Square!");
@@ -42,11 +53,12 @@ public class Square {
         else{
             Coordinate coordinate = new Coordinate(this.row, this.col);
             objectPosition.put(animal, coordinate);
-            //System.out.println("Put animal in objectPosition successfully!");
             setHasAnimal(true);
+            System.out.println( animal.name + "is at " + this.row + " " + this.col);
         }
     }
 
+    //This method sets the creature in this square, it is called when initialising board
     public void setCreature(Creature creature) throws Exception {
         if(this.isHasCreature()){
             throw new Exception("There is a creature in this Board.Square!");
@@ -59,6 +71,7 @@ public class Square {
         }
     }
 
+    //This method sets the spell in this square, it is called when initialising board
     public void setSpell(Spell spell) throws Exception {
         if (this.isHasSpell()){
             throw new Exception("There is a spell in this Board.Square!");
@@ -67,23 +80,7 @@ public class Square {
             Coordinate coordinate = new Coordinate(this.row, this.col);
             spellPosition.computeIfAbsent(spell, k -> new ArrayList<>()).add(coordinate);
             this.hasSpell = true;
-            //System.out.println(spell.getType() + "is at " + this.row + " " + this.col);
+            System.out.println(spell.getType() + "is at " + this.row + " " + this.col);
         }
-    }
-
-    public boolean isVisible(){
-        return visible;
-    }
-
-    public void changeVisibile(boolean bool){
-        this.visible = bool;
-    }
-
-    public int getRow() {
-        return this.row;
-    }
-
-    public int getCol() {
-        return this.col;
     }
 }

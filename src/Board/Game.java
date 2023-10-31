@@ -7,16 +7,21 @@ import java.util.*;
 
 
 public class Game {
-    public static Game instance;
+    public static Game instance; // Singleton instance of the Game
     public final int ROW = 20;
     public final int COL = 20;
+
     public Square[][] board = new Square[ROW][COL];
     public int turn = 0;
-    public static List<Animal> animals = new ArrayList<>();
-    public static List<Creature> creatures = new ArrayList<>();
     public static String[] moveOrder = {"Rabbit", "Fox", "Deer", "Owl", "Badger"};
+    public static List<Animal> animals = new ArrayList<>(); // a list of 5 animals
+    public static List<Creature> creatures = new ArrayList<>(); // a list of 5 creatures
     private static List<Animal> shieldAnimal = new ArrayList<>();
+
+    // A mapping of objects (animals and creatures) to their positions on the game board.
     public static HashMap<Object, Coordinate> objectPosition = new HashMap<>();
+
+    // A mapping of spells to their positions on the game board.
     public static HashMap<Spell, List<Coordinate>> spellPosition = new HashMap<>();
     public static String errorMessage = null;
     public static Spell[] spells = {Spell.Detect, Spell.Heal, Spell.Shield, Spell.Confuse, Spell.Charm};
@@ -26,7 +31,6 @@ public class Game {
     public Deer deer;
     public Owl owl;
     public Badger badger;
-
     public Unicorn unicorn;
     public Centaur centaur;
     public Dragon dragon;
@@ -45,13 +49,11 @@ public class Game {
         return instance;
     }
 
-    /*
-     *
-     * */
+    // Constructs a new game with the specified random seed.
     private Game(long seed) {
         initializeBoard();
 
-        //initialize animal and creatures
+        // construct animal and creatures, then add them to the lists
         rabbit = new Rabbit("Rabbit");
         fox = new Fox("Fox");
         deer = new Deer("Deer");
@@ -63,7 +65,6 @@ public class Game {
         animals.add(owl);
         animals.add(badger);
 
-        //initialize Creatures
         unicorn = new Unicorn("Under-appreciated Unicorn");
         centaur = new Centaur("Complicated Centaur");
         dragon = new Dragon("Deceptive Dragon");
@@ -76,7 +77,7 @@ public class Game {
         creatures.add(sphinx);
 
         Random random = new Random(seed);
-        int randomIdx;
+        int randomIdx; // using this to decide which spell to construct
 
         //place Animals
         for (int i = 0; i < 5; i++) {
@@ -138,46 +139,54 @@ public class Game {
         }
     }
 
+    /**
+     * This method moves an animal to a new position and updates the game state accordingly
+     * Game state includes:
+     * 1. moveable and spellable of an animal
+     * 2. the spells that an animal has
+     * 3. visibility of the square
+     * 4. update the life points and shield(if applicable) of previous animal
+     * 5. uodate turn
+     * 6. update confused and charmed of creatures
+     * */
     public void moveAnimal(Animal animal, int oldRow, int oldCol, int newRow, int newCol) throws Exception {
         if (gameOver()){
             errorMessage = "Game is over!";
             throw new Exception(errorMessage);
         }
         else if (animal.isMoveable() == true) {
-            //移动并更新moveable
+            // Move the animal and update its movability
             animal.move(oldRow, oldCol, newRow, newCol);
             animal.setMoveable(false);
 
-            //如果新格子有spell的话就捡起来
+            //pick up spell and remove the spell for the square
             int curRow = objectPosition.get(animal).getRow();
             int curCol = objectPosition.get(animal).getCol();
             if (board[curRow][curCol].isHasSpell()) {
                 animal.setSpells(animal.getSpells(), findSpellByCoordinate(spellPosition, curRow, curCol));
-                //把这个格子的spell移除
                 board[curRow][curCol].setHasSpell(false);
             }
-            //更新一下可见性
+            // visibility
             board[curRow][curCol].changeVisibile(true);
 
-            //结算上一回合
+            // update the life points and shield(if applicable) of previous animal
             endPreviousTurn(animal);
 
             Animal nextAnimal = findNextAnimal(animal);
             nextAnimal.setMoveable(true);
             nextAnimal.setSpellable(true);
-            //把turn更新到下一个
+            // update turn
             turn = getIndexForAnimal(nextAnimal.getName());
-            //更新怪物的confused状态
+            // update confused
             for (Creature creature : creatures){
                 if (creature.getConfusedTurnLeft() != 0){
                     creature.setConfusedTurnLeft(creature.getConfusedTurnLeft() - 1);
-                    //如果更新后为零了那么就更新一下怪物的状态
                     if (creature.getConfusedTurnLeft() == 0){
                         creature.setConfused(false);
                     }
                 }
             }
-            //更新怪物的charmed状态
+            // update charmed
             for (Creature creature : creatures){
                 if (creature.getChamAnimal() != null){
                     creature.updateChamAnimal();
@@ -190,22 +199,23 @@ public class Game {
         }
     }
 
+    // Returns the index of the animal in moveorder.
     public int getIndexForAnimal(String animalName) {
         for (int i = 0; i < moveOrder.length; i++) {
             if (moveOrder[i].equals(animalName)) {
-                return i;  // 返回索引
+                return i;
             }
         }
-        return -1;  // 如果未找到，返回-1或其他适当的值
+        return -1;
     }
 
+    // decide a creature can attack or not, update shield of animal, update spellable of animal
     public void endPreviousTurn(Animal animal) {
         Animal preAnimal = findPreviousAnimal(animal);
-        //下个动物移动了以后上一个动物就不可以用spell了，但是如果还没移动的话就可以
+        // If the current turn animal moved, then the previous turn animal cannot spell
         preAnimal.setSpellable(false);
         Creature creature = (Creature)findCreatureByCoordinate(objectPosition, objectPosition.get(preAnimal).getRow(), objectPosition.get(preAnimal).getCol());
         if (creature != null && !shieldAnimal.contains(preAnimal)) {
-            //如果眩晕了就不攻击了，直接返回
             if (creature.isConfused() == true) {
                 System.out.println("Debug : " + creature.getName() + " is confused!");
             }else if (creature.getChamAnimal().containsKey(preAnimal)){
@@ -215,19 +225,24 @@ public class Game {
                 System.out.println("Debug : " + creature.getName() + " attack an animal successful!");
             }
         }
-        //如果有护盾那么就不攻击
         else if (shieldAnimal.contains(preAnimal)) {
             shieldAnimal.remove(preAnimal);
         }
         System.out.println("Debug : Update the turn successful!");
     }
 
+    // allow creature to attack and update the life points of animal
     public void attackAnimal(Creature creature, Animal animal) {
         int newLifePoints = animal.getLifePoints() - creature.getAttack();
         animal.setLifePoints(newLifePoints);
         if (animal.getLifePoints() < 0) animal.setLifePoints(0);
     }
 
+    /**
+     * Checks if the game is over by examining the life points of all animal characters and their positions.
+     *
+     * @return True if the game is over, false otherwise.
+     */
     public boolean gameOver() {
         for (Animal animal : animals) {
             if (animal.getLifePoints() == 0) return true;
@@ -244,8 +259,15 @@ public class Game {
         return board[row][col];
     }
 
+    /**
+     * Casts a spell using an animal character and updates the game state accordingly.
+     *
+     * @param animal The animal character casting the spell.
+     * @param spell  The spell to cast.
+     */
     public void castSpell(Animal animal, Spell spell) throws Exception {
         int previousTurn = (turn - 1 + moveOrder.length) % moveOrder.length;
+        //both the current turn and previous turn animal can cast spell
         if (animal.getName().equals(moveOrder[turn]) || animal.getName().equals(moveOrder[previousTurn])) {
             String spellType = spell.getType();
             Creature creature = nearCreature(animal);
@@ -271,7 +293,6 @@ public class Game {
                     shieldAnimal.add(animal);
                     break;
                 case "Confuse":
-                    //如果有的话，先返回这个怪物，让它中招一个回合
                     if (creature!= null) {
                         creature.setConfused(true);
                         creature.setConfusedTurnLeft(6);
@@ -284,8 +305,9 @@ public class Game {
                     }
                     break;
             }
+
+            // update spell number that an animal holds
             animal.getSpells().put(spell, animal.getSpells().get(spell) - 1);
-            //remove the spell from map if value == 0
             Iterator<Map.Entry<Spell, Integer>> iterator = animal.spells.entrySet().iterator();
             while (iterator.hasNext()) {
                 Map.Entry<Spell, Integer> entry = iterator.next();
@@ -293,7 +315,7 @@ public class Game {
                     iterator.remove();
                 }
             }
-            //如果animal是turn对应的动物的话，就更新turn，否则不用更新
+
             if (animal.getName().equals(moveOrder[turn])) turn++;
             if (turn == moveOrder.length) turn = 0;
             animal.setSpellable(false);
@@ -308,7 +330,7 @@ public class Game {
         }
     }
 
-    /*The methods below are only used in Game class, so they should be private*/
+    // construct squares
     private void initializeBoard() {
         for (int row = 0; row < ROW; row++) {
             for (int col = 0; col < COL; col++) {
@@ -331,16 +353,13 @@ public class Game {
     private void placeAnimal(Random random, Animal animal, Square[][] board) {
         while (true) {
             try {
-                //System.out.println("The random num is " + randomCol);
                 int randomCol = random.nextInt(20);
                 board[19][randomCol].setAnimal(animal);
                 board[19][randomCol].changeVisibile(true);
-                System.out.println(animal.getName() + "is at col： " + randomCol);
             } catch (Exception e) {
                 e.printStackTrace();
                 continue;
             }
-            //System.out.println("This animal has been placed at row 0, col " + randomCol);
             break;
         }
     }
@@ -349,7 +368,7 @@ public class Game {
     private void placeCreature(Random random, Creature creature, Square[][] board) {
         while (true) {
             try {
-                int randomRow = random.nextInt(18) + 1;//exclude the first and the last row
+                int randomRow = random.nextInt(18) + 1;
                 int randomCol = random.nextInt(20);
                 board[randomRow][randomCol].setCreature(creature);
             } catch (Exception e) {
@@ -360,10 +379,11 @@ public class Game {
         }
     }
 
+    //This method place spells randomly excluding the first and the last row
     private void placeSpell(Random random, Spell spell, Square[][] board) {
         while (true) {
             try {
-                int randomRow = random.nextInt(18) + 1;//exclude the first and the last row
+                int randomRow = random.nextInt(18) + 1;
                 int randomCol = random.nextInt(20);
                 board[randomRow][randomCol].setSpell(spell);
                 System.out.println(spell.getType() + " is at row " + randomRow + " col " + randomCol);
@@ -375,6 +395,11 @@ public class Game {
         }
     }
 
+    /**
+     * This method check if there is a creature on a square adjacent to the animal
+     *
+     * @return if the creature exists it will be returned
+     * */
     public Creature nearCreature(Animal animal) {
         int curRow = animal.getSquare(animal).getRow();
         int curCol = animal.getSquare(animal).getCol();
@@ -395,10 +420,12 @@ public class Game {
         return null;
     }
 
+    // make sure not out of bounds
     private boolean isValidCoordinate(int row, int col) {
         return row >= 0 && row < ROW && col >= 0 && col < COL;
     }
 
+    // given location this method will return the animal
     private Object findAnimalByCoordinate(HashMap<Object, Coordinate> map, int row, int col) {
         for (Map.Entry<Object, Coordinate> entry : map.entrySet()) {
             if (entry.getValue().getRow() == row && entry.getValue().getCol() == col) {
@@ -411,6 +438,7 @@ public class Game {
         return null;
     }
 
+    // given location this method will return the creature
     private Object findCreatureByCoordinate(HashMap<Object, Coordinate> map, int row, int col) {
         for (Map.Entry<Object, Coordinate> entry : map.entrySet()) {
             if (entry.getValue().getRow() == row && entry.getValue().getCol() == col) {
@@ -423,6 +451,7 @@ public class Game {
         return null;
     }
 
+    // // given location this method will return the spell
     private Spell findSpellByCoordinate(HashMap<Spell, List<Coordinate>> map, int row, int col) {
         for (Map.Entry<Spell, List<Coordinate>> entry : map.entrySet()) {
             List<Coordinate> coordinates = entry.getValue();
@@ -435,19 +464,17 @@ public class Game {
         return null;
     }
 
-
+    // This method would return the name of the next animal in moveorder
     public static String getNextAnimal(String currentAnimal) {
         for (int i = 0; i < moveOrder.length; i++) {
             if (moveOrder[i].equals(currentAnimal)) {
                 if (i == moveOrder.length - 1) {
-                    // 如果当前动物是"Badger"，下一个是"Rabbit"
                     return moveOrder[0];
                 } else {
                     return moveOrder[i + 1];
                 }
             }
         }
-        // 如果当前动物不在数组中，或者发生其他错误，返回空字符串或者其他适当的值
         return "";
     }
 }

@@ -67,12 +67,12 @@ public class Fox extends Animal {
         int colMovement = Math.abs(oldCol - newCol);
 
         Game game = Game.getInstance(seed);
-        //如果没有水平或竖直的走
+        // Not moving horizontally or vertically
         if (rowMovement != 0 && colMovement != 0) {
             errorMessage = "The fox can only move horizontally or vertically.";
             throw new Exception(errorMessage);
         }
-        //如果超出了范围
+        // out of range
         else if (rowMovement > 3 || colMovement > 3) {
             errorMessage = "The fox can only move 3 spaces horizontally or vertically.";
             throw new Exception(errorMessage);
@@ -80,9 +80,8 @@ public class Fox extends Animal {
             errorMessage = "The fox cannot move because there is an animal in the way.";
             throw new Exception(errorMessage);
         }
-        //跳两格
+        // jump two squares
         else if (rowMovement == 2 || colMovement == 2) {
-            //竖直移动
             if (rowMovement == 0) {
                 if (withCreature(newRow, oldCol + (newCol - oldCol) / 2)) {
                     game.getSquare(newRow, oldCol + (newCol - oldCol) / 2).setAnimal(this);
@@ -92,10 +91,9 @@ public class Fox extends Animal {
                 } else {
                     game.getSquare(newRow, newCol).setAnimal(this);
                 }
-                game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
+                game.getSquare(oldRow, oldCol).setHasAnimal(false);
                 return true;
             }
-            //水平移动
             else if (colMovement == 0) {
                 if (withCreature(oldRow + (newRow - oldRow) / 2, newCol)) {
                     game.getSquare(oldRow + (newRow - oldRow) / 2, newCol).setAnimal(this);
@@ -110,7 +108,7 @@ public class Fox extends Animal {
                 return true;
             }
         }
-        //跳三格
+        //jump three squares
         else if (rowMovement == 3 || colMovement == 3) {
             if (rowMovement == 0) {
                 int tmpCol = newCol - oldCol > 0 ? oldCol + 2 : oldCol - 2;
@@ -125,7 +123,7 @@ public class Fox extends Animal {
                 } else {
                     game.getSquare(newRow, newCol).setAnimal(this);
                 }
-                game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
+                game.getSquare(oldRow, oldCol).setHasAnimal(false);
                 return true;
             } else if (colMovement == 0) {
                 int tmpRow = newRow - oldRow > 0 ? oldRow + 2 : oldRow - 2;
@@ -140,11 +138,11 @@ public class Fox extends Animal {
                 } else {
                     game.getSquare(newRow, newCol).setAnimal(this);
                 }
-                game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
+                game.getSquare(oldRow, oldCol).setHasAnimal(false);
                 return true;
             }
         }
-        //走
+        //walk
         else if (rowMovement == 1 || colMovement == 1) {
             game.getSquare(newRow, newCol).setAnimal(this);
             game.getSquare(oldRow, oldCol).setHasAnimal(false);

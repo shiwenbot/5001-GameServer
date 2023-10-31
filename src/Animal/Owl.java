@@ -65,6 +65,7 @@ public class Owl extends Animal {
         int colMovement = Math.abs(oldCol - newCol);
 
         Game game = Game.getInstance(seed);
+        // not straight line
         if (!isStraightLine(oldRow, oldCol, newRow, newCol)) {
             errorMessage = "The owl can only move in a straight line.";
             throw new Exception(errorMessage);
@@ -72,12 +73,11 @@ public class Owl extends Animal {
             errorMessage = "There is an animal in this square.";
             throw new Exception(errorMessage);
         }
-        //飞
+        //fly
         else if (rowMovement > 1 || colMovement > 1) {
+            //8 directions
             if (rowMovement == 0) {
                 int stepsLeft = colMovement;
-                //区别就是+1和-1
-                //移动成功后之前的格子就没有动物了
                 if (newCol - oldCol > 0) {
                     for (int i = 1; i <= stepsLeft; i++) {
                         if (withCreature(newRow, oldCol + i) && game.getSquare(newRow, oldCol + i).isHasAnimal()) {
@@ -85,7 +85,7 @@ public class Owl extends Animal {
                             throw new Exception(errorMessage);
                         } else if (withCreature(newRow, oldCol + i)) {
                             game.getSquare(newRow, oldCol + i).setAnimal(this);
-                            game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
+                            game.getSquare(oldRow, oldCol).setHasAnimal(false);
                             return true;
                         }
                     }
@@ -96,13 +96,13 @@ public class Owl extends Animal {
                             throw new Exception(errorMessage);
                         } else if (withCreature(newRow, oldCol - i)) {
                             game.getSquare(newRow, oldCol - i).setAnimal(this);
-                            game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
+                            game.getSquare(oldRow, oldCol).setHasAnimal(false);
                             return true;
                         }
                     }
                 }
                 game.getSquare(newRow, newCol).setAnimal(this);
-                game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
+                game.getSquare(oldRow, oldCol).setHasAnimal(false);
                 return true;
 
             } else if (colMovement == 0) {
@@ -114,7 +114,7 @@ public class Owl extends Animal {
                             throw new Exception(errorMessage);
                         } else if (withCreature(oldRow + i, newCol)) {
                             game.getSquare(oldRow + i, newCol).setAnimal(this);
-                            game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
+                            game.getSquare(oldRow, oldCol).setHasAnimal(false);
                             return true;
                         }
                     }
@@ -125,13 +125,13 @@ public class Owl extends Animal {
                             throw new Exception(errorMessage);
                         } else if (withCreature(oldRow - i, newCol)) {
                             game.getSquare(oldRow - i, newCol).setAnimal(this);
-                            game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
+                            game.getSquare(oldRow, oldCol).setHasAnimal(false);
                             return true;
                         }
                     }
                 }
                 game.getSquare(newRow, newCol).setAnimal(this);
-                game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
+                game.getSquare(oldRow, oldCol).setHasAnimal(false);
                 return true;
             }
             else {
@@ -145,7 +145,7 @@ public class Owl extends Animal {
                             throw new Exception(errorMessage);
                         } else if (withCreature(oldRow + i, oldCol + i)) {
                             game.getSquare(oldRow + i, oldCol + i).setAnimal(this);
-                            game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
+                            game.getSquare(oldRow, oldCol).setHasAnimal(false);
                             return true;
                         }
                     }
@@ -157,7 +157,7 @@ public class Owl extends Animal {
                             throw new Exception(errorMessage);
                         } else if (withCreature(oldRow + i, oldCol - i)) {
                             game.getSquare(oldRow + i, oldCol - i).setAnimal(this);
-                            game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
+                            game.getSquare(oldRow, oldCol).setHasAnimal(false);
                             return true;
                         }
                     }
@@ -169,7 +169,7 @@ public class Owl extends Animal {
                             throw new Exception(errorMessage);
                         } else if (withCreature(oldRow - i, oldCol + i)) {
                             game.getSquare(oldRow - i, oldCol + i).setAnimal(this);
-                            game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
+                            game.getSquare(oldRow, oldCol).setHasAnimal(false);
                             return true;
                         }
                     }
@@ -181,17 +181,17 @@ public class Owl extends Animal {
                             throw new Exception(errorMessage);
                         } else if (withCreature(oldRow - i, oldCol - i)) {
                             game.getSquare(oldRow - i, oldCol - i).setAnimal(this);
-                            game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
+                            game.getSquare(oldRow, oldCol).setHasAnimal(false);
                             return true;
                         }
                     }
                 }
                 game.getSquare(newRow, newCol).setAnimal(this);
-                game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
+                game.getSquare(oldRow, oldCol).setHasAnimal(false);
                 return true;
             }
         }
-        //走
+        //walk
         else if(rowMovement == 1 || colMovement == 1){
             game.getSquare(newRow, newCol).setAnimal(this);
             game.getSquare(oldRow, oldCol).setHasAnimal(false);

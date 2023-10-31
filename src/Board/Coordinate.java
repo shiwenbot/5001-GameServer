@@ -13,15 +13,7 @@ public class Coordinate {
         return row;
     }
 
-    public void setX(int row) {
-        this.row = row;
-    }
-
     public int getCol() {
         return col;
-    }
-
-    public void setY(int col) {
-        this.col = col;
     }
 }

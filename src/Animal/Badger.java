@@ -70,7 +70,7 @@ public class Badger extends Animal {
         int colMovement = Math.abs(oldCol - newCol);
 
         Game game = Game.getInstance(seed);
-        //超出范围
+        // out of range
         if (rowMovement > 2 || colMovement > 2) {
             errorMessage = "The badger can only move 2 spaces in a straight line.";
             throw new Exception(errorMessage);
@@ -81,11 +81,11 @@ public class Badger extends Animal {
             errorMessage = "There is an animal in this square.";
             throw new Exception(errorMessage);
         }
-        //挖
+        //dig
         else if (rowMovement == 2 || colMovement == 2) {
             if (rowMovement == 0) {
                 game.getSquare(newRow, newCol).setAnimal(this);
-                game.getSquare(oldRow, oldCol).setHasAnimal(false);//移动成功后之前的格子就没有动物了
+                game.getSquare(oldRow, oldCol).setHasAnimal(false);
                 return true;
             } else if (colMovement == 0) {
                 game.getSquare(newRow, newCol).setAnimal(this);
@@ -97,7 +97,7 @@ public class Badger extends Animal {
                 return true;
             }
         }
-        //走
+        //walk
         else if (rowMovement == 1 || colMovement == 1) {
             game.getSquare(newRow, newCol).setAnimal(this);
             game.getSquare(oldRow, oldCol).setHasAnimal(false);

@@ -59,20 +59,22 @@ public class Deer extends Animal {
         int colMovement = Math.abs(oldCol - newCol);
 
         Game game = Game.getInstance(seed);
-        //如果没有水平或竖直的走
+        // out of range
         if (rowMovement > 3 || colMovement > 3) {
             errorMessage = "The deer can only move 3 spaces in any direction.";
             throw new Exception(errorMessage);
-        } else if (!isStraightLine(oldRow, oldCol, newRow, newCol)) {
+        }
+        // not straight line
+        else if (!isStraightLine(oldRow, oldCol, newRow, newCol)) {
             errorMessage = " The deer can only move in a straight line.";
             throw new Exception(errorMessage);
         }
-        //如果目标地点有动物
+        // if there is animal in the detination square
         else if(game.board[newRow][newCol].isHasAnimal()){
             errorMessage = "The fox cannot move because there is an animal in the way.";
             throw new Exception(errorMessage);
         }
-        //跳和走
+        //jump and walk
         else if (rowMovement >= 1 || colMovement >= 1) {
             game.getSquare(newRow, newCol).setAnimal(this);
             game.getSquare(oldRow, oldCol).setHasAnimal(false);

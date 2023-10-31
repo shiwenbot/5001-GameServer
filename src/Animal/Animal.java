@@ -17,10 +17,6 @@ public class Animal {
     public String name;
     public String type = "Animal";
 
-    public void setSpells(Map<Spell, Integer> spells, Spell spell) {
-        spells.put(spell, spells.getOrDefault(spell, 0) + 1);
-    }
-
     public HashMap<Spell, Integer> spells = new HashMap<>();
     public boolean moveable;
     public boolean spellable;
@@ -29,6 +25,9 @@ public class Animal {
     public String description;
     public Animal(String name) {
         this.name = name;
+    }
+    public void setSpells(Map<Spell, Integer> spells, Spell spell) {
+        spells.put(spell, spells.getOrDefault(spell, 0) + 1);
     }
 
     public void setLifePoints(int lifePoints) {
@@ -80,13 +79,11 @@ public class Animal {
     public int getLifePoints() {
         return lifePoints;
     }
-    //判断格子中是否已经有了怪物
     public boolean withCreature(int row, int col){
         Game game = Game.getInstance(seed);
         if(game.getSquare(row, col).isHasCreature()) return true;
         return false;
     }
-    //判断是不是走的直线
     public boolean isStraightLine(int oldRow, int oldCol, int newRow, int newCol){
         int rowMovement = Math.abs(oldRow - newRow);
         int colMovement = Math.abs(oldCol - newCol);

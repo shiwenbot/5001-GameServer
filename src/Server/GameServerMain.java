@@ -11,15 +11,25 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Random;
 
 import static Board.Game.*;
 
 public class GameServerMain {
     public static long seed;
+    public static int port;
+
+    /**
+     * The main method of the Game Server.
+     * Initializes the server, listens for incoming connections, and handles requests.
+     *
+     * Command line arguments containing the seed and port number.
+     */
     public static void main(String[] args) {
+        //seed = Integer.parseInt(args[0]);
+        //port = Integer.parseInt(args[0]);
         seed = 1;
-        int port = 8088; // 服务器端口
-        Game game = Game.getInstance(seed);
+        port = 8088;
         try {
             ServerSocket serverSocket = new ServerSocket(port);
             System.out.println("Server listening on port " + port);
@@ -27,8 +37,6 @@ public class GameServerMain {
             while (true) {
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Client connected from " + clientSocket.getInetAddress());
-
-                // 处理请求
                 handleRequest(clientSocket);
             }
         } catch (IOException e) {
@@ -36,6 +44,7 @@ public class GameServerMain {
         }
     }
 
+    //Handles an incoming client request.
     private static void handleRequest(Socket clientSocket) {
         Game game = Game.getInstance(seed);
         String finalGameData = null;
@@ -43,63 +52,61 @@ public class GameServerMain {
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
 
-            // 读取请求行
+            // Read the request line
             String requestLine = in.readLine();
             System.out.println("Request: " + requestLine);
 
-            // 解析请求方法和路径
+            // Parse the request method and path
             String[] requestParts = requestLine.split(" ");
             String method = requestParts[0];
             String path = requestParts[1];
 
-            // 处理不同的请求
+            // Handle different types of requests
             if (method.equals("GET") && path.equals("/")) {
-                // 处理 GET / 请求
+                // Handle GET / request
                 sendResponse(out, 200, "{\"status\": \"ok\"}");
             } else if (method.equals("GET") && path.equals("/game")) {
-                // 处理 GET /game 请求
-                // 这里需要返回当前游戏状态的 JSON 数据
-                String gameData = getGameData(); // 你需要实现这个方法
+                // Handle GET /game request
+                String gameData = getGameData();
                 sendResponse(out, 200, gameData);
             }  else if (method.equals("POST") && path.equals("/game")) {
-                // 处理 POST /game 请求
-                // 读取请求体
+                // Handle POST /game request
                 int contentLength = getContentLength(in);
                 String requestBody = readRequestBody(in, contentLength);
 
-                // 处理请求体，你需要实现这部分逻辑
-                String newGameData = processGameAction(requestBody); // 你需要实现这个方法
+                String newGameData = processGameAction(requestBody);
                 if (game.gameOver()) {
                     finalGameData = newGameData;
                 }
                 sendResponse(out, 200, game.gameOver() ? finalGameData : newGameData);
             } else if (method.equals("POST") && path.equals("/reset")) {
-                System.out.println("handle here");
                 String newGameData = resetGame();
-                System.out.println(newGameData);
                 sendResponse(out, 200, newGameData);
             } else if (method.equals("OPTIONS")) {
-                // 处理 OPTIONS 请求
-                // 发送 CORS 头信息
+                // CORS header
                 out.println("HTTP/1.1 204 No Content");
                 out.println("Access-Control-Allow-Origin: *");
                 out.println("Access-Control-Allow-Methods: *");
                 out.println("Access-Control-Allow-Headers: *");
                 out.println("Access-Control-Max-Age: 86400");
             } else {
-                // 不支持其他请求类型
-                System.out.println("are we here as well?");
+                // Unsupported request type
                 sendResponse(out, 501, "Not Implemented");
             }
-            // 关闭连接
             clientSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * Sends an HTTP response to the client.
+     *
+     * @param out        PrintWriter for sending the response.
+     * @param statusCode HTTP status code.
+     * @param body       Response body in JSON format.
+     */
     private static void sendResponse(PrintWriter out, int statusCode, String body) {
-        // 发送响应头
         out.println("HTTP/1.1 " + statusCode);
         out.println("Content-Type: application/json");
         out.println("Access-Control-Allow-Origin: *");
@@ -108,10 +115,10 @@ public class GameServerMain {
         out.println("Access-Control-Max-Age: 86400");
         out.println();
 
-        // 发送响应体
         out.println(body);
     }
 
+    // Extracts the content length from the request headers.
     private static int getContentLength(BufferedReader in) throws IOException {
         String line;
         int contentLength = 0;
@@ -123,32 +130,35 @@ public class GameServerMain {
         return contentLength;
     }
 
+    // Read the request body from the client.
     private static String readRequestBody(BufferedReader in, int contentLength) throws IOException {
         char[] buffer = new char[contentLength];
         in.read(buffer, 0, contentLength);
         return new String(buffer);
     }
 
-    // 实现获取游戏状态的方法
+    /**
+     * This method retrieves the game data in JSON format.
+     *
+     * @return A JSON string representing the current game state.
+     */
     private static String getGameData() {
-        System.out.println("seed: " + seed);
         Game game = Game.getInstance(seed);
-        //这个map存储了所有的有生物的坐标，如果一个格子有很多object怎么办？
+
         ArrayList<Coordinate> locationList = new ArrayList<>();
         for (Coordinate coordinate : objectPosition.values()) {
             locationList.add(coordinate);
         }
 
         JsonArrayBuilder board = Json.createArrayBuilder();
-        //把board框架搭起来
         for (int row = 0; row < 20; row++) {
             JsonArrayBuilder rowBoard = Json.createArrayBuilder();
              for (int col = 0; col < 20; col++) {
-                //如果当前坐标存在于map说明有生物
                 if(hasObject(row, col, locationList)){
                     Animal animal = isAnimal(row, col);
                     Creature creature = isCreature(row, col);
-                    //需要考虑是否同时存在动物和spell
+
+                    // If the square has animal and creature at the same time
                     if (animal != null && creature != null){
                         JsonObjectBuilder cellDetailBuilder1 = Json.createObjectBuilder();
                         JsonObjectBuilder cellDetailBuilder2 = Json.createObjectBuilder();
@@ -175,7 +185,9 @@ public class GameServerMain {
                                 .add("confused", false)
                                 .add("charmed", Json.createArrayBuilder());
                         rowBoard.add(Json.createArrayBuilder().add(cellDetailBuilder1).add(cellDetailBuilder2));
-                    }else if(animal != null){
+                    }
+                    // only have animal
+                    else if(animal != null){
                         JsonObjectBuilder cellDetailBuilder = Json.createObjectBuilder();
                         cellDetailBuilder.add("name", animal.getName())
                                 .add("type", "Animal")
@@ -192,7 +204,9 @@ public class GameServerMain {
                         }
                         cellDetailBuilder.add("spells", spellDetails);
                         rowBoard.add(Json.createArrayBuilder().add(cellDetailBuilder));
-                    }else if(creature != null && game.board[row][col].isVisible()){
+                    }
+                    //only has creature and this square is visibile
+                    else if(creature != null && game.board[row][col].isVisible()){
                         JsonObjectBuilder cellDetailBuilder = Json.createObjectBuilder();
                         cellDetailBuilder.add("name", creature.name)
                                 .add("type", "Creature")
@@ -247,14 +261,14 @@ public class GameServerMain {
                     gameBuilder.add("status", statusMessage);
                 }else{
                     gameBuilder.add("status", "The last move was invalid.").add("extendedStatus", errorMessage);
-                    //errorMessage = null;
                 }
         JsonObject gameJson = gameBuilder.build();
         String gameString = gameJson.toString();
-        //System.out.println(gameString);
         return gameString;
     }
 
+
+    // This method checks if there is any animals and creatures in the square.
     private static boolean hasObject(int row, int col, ArrayList<Coordinate> locationList){
         for (Coordinate coordinate: locationList) {
             if (coordinate.getRow() == row && coordinate.getCol() == col)
@@ -262,10 +276,8 @@ public class GameServerMain {
         }
         return false;
     }
-    private static String findNextAnimal(int turn, String[] moveOrder){
-        if (moveOrder[turn].equals("Badger")) return "Rabbit";
-        return moveOrder[turn + 1];
-    }
+
+    // This method checks if the object is an animal, if so the animal would be return
     private static Animal isAnimal(int row, int col){
         for (Animal animal: animals) {
             if (objectPosition.get(animal).getRow() == row && objectPosition.get(animal).getCol() == col){
@@ -275,6 +287,7 @@ public class GameServerMain {
         return null;
     }
 
+    // This method checks if the object is a creature, if so the creature would be return
     private static Creature isCreature(int row, int col){
         for (Creature creature: creatures) {
             if(objectPosition.get(creature).getRow() == row && objectPosition.get(creature).getCol() == col){
@@ -284,16 +297,13 @@ public class GameServerMain {
         return null;
     }
 
-    // 实现处理游戏动作的方法
+    // This method processes game actions (move and cast spell)
     private static String processGameAction(String requestBody) {
         Game game = Game.getInstance(seed);
-        // 你需要实现这个方法，根据请求体的内容处理游戏动作，返回新的游戏状态的 JSON 数据
-        // 例如: return "{\"gameState\": \"updated\"}";
         try{
-            // 解析请求体为 JSON 对象
             JsonObject jsonRequest = Json.createReader(new StringReader(requestBody)).readObject();
             String action = jsonRequest.getString("action");
-            // 提取请求中的动作、动物和目标坐标
+            // move
             if (action.equals("move")){
                 String animalName = jsonRequest.getString("animal");
                 Animal animal = new Animal("tmp");
@@ -304,10 +314,11 @@ public class GameServerMain {
                 int newRow = toSquare.getInt("row");
                 int newCol = toSquare.getInt("col");
                 game.moveAnimal(animal, objectPosition.get(animal).getRow(), objectPosition.get(animal).getCol(), newRow, newCol);
-            } else if (action.equals("spell")) {
+            }
+            // cast spell
+            else if (action.equals("spell")) {
                 String animalName = jsonRequest.getString("animal");
                 String spellName = jsonRequest.getString("spell");
-                //获取动物和法术
                 Animal animal = null;
                 Spell spell = null;
                 for (Animal a: animals) {
@@ -322,16 +333,16 @@ public class GameServerMain {
             return newGameData;
         }catch (Exception e) {
             e.printStackTrace();
-            return "{\"error\": \"Invalid request\"}"; // 处理请求出错时返回错误信息
+            return "{\"error\": \"Invalid request\"}";
         }
     }
 
-
-    // 实现重置游戏的方法
+    // resets the game
     private static String resetGame() {
         instance = null;
-        seed = 2;
-        Game game = Game.getInstance(seed);
+        Random r = new Random();
+        seed = r.nextInt();
+        Game.getInstance(seed);
         String newGameData = getGameData();
         return newGameData;
     }

@@ -14,6 +14,8 @@ public class Creature {
     public String description;
     public boolean confused;
     public boolean charmed;
+    public int confusedTurnLeft = 0;
+    public int charmedTurnLeft = 0;
     public String type = "Creature";
     public HashMap<Animal, Integer> chamAnimal = new HashMap<>();
 
@@ -24,26 +26,19 @@ public class Creature {
         chamAnimal.put(animal, 16);
     }
     public void updateChamAnimal(){
-        // 创建一个迭代器以遍历 HashMap 的键
         Iterator<Map.Entry<Animal, Integer>> iterator = chamAnimal.entrySet().iterator();
-
+        //if the value == 0, key will be removed.
         while (iterator.hasNext()) {
             Map.Entry<Animal, Integer> entry = iterator.next();
             int updatedValue = entry.getValue() - 1;
 
             if (updatedValue == 0) {
-                // 值为0或更小，移除键
                 iterator.remove();
             } else {
-                // 更新键对应的值
                 chamAnimal.put(entry.getKey(), updatedValue);
             }
         }
     }
-
-
-    public int confusedTurnLeft = 0;
-    public int charmedTurnLeft = 0;
 
     public boolean isCharmed() {
         return charmed;
@@ -96,10 +91,5 @@ public class Creature {
 
     public Creature(String name) {
         this.name = name;
-        //System.out.println("Construct a creature.");
     }
-
-
-
-
 }

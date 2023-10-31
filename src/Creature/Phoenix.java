@@ -21,7 +21,6 @@ public class Phoenix extends Creature{
         return chamAnimal;
     }
     public void updateChamAnimal(){
-        // 创建一个迭代器以遍历 HashMap 的键
         Iterator<Map.Entry<Animal, Integer>> iterator = chamAnimal.entrySet().iterator();
 
         while (iterator.hasNext()) {
@@ -29,10 +28,8 @@ public class Phoenix extends Creature{
             int updatedValue = entry.getValue() - 1;
 
             if (updatedValue == 0) {
-                // 值为0或更小，移除键
                 iterator.remove();
             } else {
-                // 更新键对应的值
                 chamAnimal.put(entry.getKey(), updatedValue);
             }
         }
