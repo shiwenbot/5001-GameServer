@@ -7,5 +7,5 @@
 问题：moveAnimal应不应该改turn
 creature是什么时候传？
 
-兔子跳的时候如果跨过了动物移动就会失败
-需要添加一下其他动物的get lifepoint方法
+bug：如果动物没有移动而是直接施法，那么endPreviousTurn就不会执行
+在边缘施法会失败，原因是超出了index

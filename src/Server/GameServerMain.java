@@ -38,6 +38,7 @@ public class GameServerMain {
 
     private static void handleRequest(Socket clientSocket) {
         Game game = Game.getInstance(seed);
+        String finalGameData = null;
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
@@ -60,7 +61,7 @@ public class GameServerMain {
                 // 这里需要返回当前游戏状态的 JSON 数据
                 String gameData = getGameData(); // 你需要实现这个方法
                 sendResponse(out, 200, gameData);
-            } else if (method.equals("POST") && path.equals("/game")) {
+            }  else if (method.equals("POST") && path.equals("/game")) {
                 // 处理 POST /game 请求
                 // 读取请求体
                 int contentLength = getContentLength(in);
@@ -68,11 +69,14 @@ public class GameServerMain {
 
                 // 处理请求体，你需要实现这部分逻辑
                 String newGameData = processGameAction(requestBody); // 你需要实现这个方法
-                sendResponse(out, 200, newGameData);
+                if (game.gameOver()) {
+                    finalGameData = newGameData;
+                }
+                sendResponse(out, 200, game.gameOver() ? finalGameData : newGameData);
             } else if (method.equals("POST") && path.equals("/reset")) {
-                // 处理 POST /reset 请求
-                // 重置游戏并返回新的游戏状态
-                String newGameData = resetGame(); // 你需要实现这个方法
+                System.out.println("handle here");
+                String newGameData = resetGame();
+                System.out.println(newGameData);
                 sendResponse(out, 200, newGameData);
             } else if (method.equals("OPTIONS")) {
                 // 处理 OPTIONS 请求
@@ -84,6 +88,7 @@ public class GameServerMain {
                 out.println("Access-Control-Max-Age: 86400");
             } else {
                 // 不支持其他请求类型
+                System.out.println("are we here as well?");
                 sendResponse(out, 501, "Not Implemented");
             }
             // 关闭连接
@@ -126,7 +131,8 @@ public class GameServerMain {
 
     // 实现获取游戏状态的方法
     private static String getGameData() {
-        Game game = Game.getInstance(1);
+        System.out.println("seed: " + seed);
+        Game game = Game.getInstance(seed);
         //这个map存储了所有的有生物的坐标，如果一个格子有很多object怎么办？
         ArrayList<Coordinate> locationList = new ArrayList<>();
         for (Coordinate coordinate : objectPosition.values()) {
@@ -207,7 +213,7 @@ public class GameServerMain {
             board.add(rowBoard);
         }
 
-        String statusMessage = errorMessage != null ? errorMessage : "The last move was successful";
+        String statusMessage = errorMessage != null ? errorMessage : "The last action was successful";
         String turnType = null;
         Animal animal = null;
         for (Animal a : animals){
@@ -227,19 +233,21 @@ public class GameServerMain {
         }else {
             currentAnimalTurn = moveOrder[game.turn];
         }
+        boolean gameOver = game.gameOver();
 
         String nextAnimalTurn = getNextAnimal(currentAnimalTurn);
 
         JsonObjectBuilder gameBuilder = Json.createObjectBuilder()
                 .add("board", board)
-                .add("gameOver", false)
+                .add("gameOver", gameOver)
                 .add("currentAnimalTurn", currentAnimalTurn)
+                .add("turnType", turnType)
                 .add("nextAnimalTurn", nextAnimalTurn);
-                if(statusMessage == "The last move was successful"){
+                if(statusMessage == "The last action was successful"){
                     gameBuilder.add("status", statusMessage);
                 }else{
                     gameBuilder.add("status", "The last move was invalid.").add("extendedStatus", errorMessage);
-                    errorMessage = null;
+                    //errorMessage = null;
                 }
         JsonObject gameJson = gameBuilder.build();
         String gameString = gameJson.toString();
@@ -321,8 +329,8 @@ public class GameServerMain {
 
     // 实现重置游戏的方法
     private static String resetGame() {
-        // 你需要实现这个方法，重置游戏并返回新的游戏状态的 JSON 数据
-        // 例如: return "{\"gameState\": \"reset\"}";
+        instance = null;
+        seed = 2;
         Game game = Game.getInstance(seed);
         String newGameData = getGameData();
         return newGameData;

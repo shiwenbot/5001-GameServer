@@ -7,20 +7,26 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class Sphinx extends Creature{
-    public String name = "Sassy Sphinx";
-    public String shortName = "SS";
-    public int attack = 21;
-    public String description = "The SS is a sphinx that is very sassy. The sphinx is very good at giving sarcastic answers to questions.";
-    public boolean confused;
-    public boolean charmed;
-    public String type = "Creature";
-    public int confusedTurnLeft = 0;
-    public int charmedTurnLeft = 0;
+    private String name = "Sassy Sphinx";
+    private String shortName = "SS";
+    private int attack = 21;
+    private String description = "The SS is a sphinx that is very sassy. The sphinx is very good at giving sarcastic answers to questions.";
+    private boolean confused;
+    private boolean charmed;
+    private String type = "Creature";
+    private int confusedTurnLeft = 0;
+    private int charmedTurnLeft = 0;
     public HashMap<Animal, Integer> chamAnimal = new HashMap<>();
     @Override
     public String getName() {
         return name;
     }
+
+    @Override
+    public String getType() {
+        return type;
+    }
+
     public HashMap<Animal, Integer> getChamAnimal() {
         return chamAnimal;
     }

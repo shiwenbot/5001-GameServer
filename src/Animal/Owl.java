@@ -135,7 +135,9 @@ public class Owl extends Animal {
                 return true;
             }
             else {
-                if (rowMovement > 0 && colMovement > 0){
+                int rowDiff = newRow - oldRow;
+                int colDiff = newCol - oldCol;
+                if (rowDiff > 0 && colDiff > 0){
                     int stepsLeft = colMovement;
                     for (int i = 1; i <= stepsLeft; i++){
                         if (withCreature(oldRow + i, oldCol + i) && game.getSquare(oldRow + i, oldCol + i).isHasAnimal()){
@@ -147,7 +149,7 @@ public class Owl extends Animal {
                             return true;
                         }
                     }
-                } else if (rowMovement > 0 && colMovement < 0) {
+                } else if (rowDiff > 0 && colDiff < 0) {
                     int stepsLeft = colMovement;
                     for (int i = 1; i <= stepsLeft; i++){
                         if (withCreature(oldRow + i, oldCol - i) && game.getSquare(oldRow + i, oldCol - i).isHasAnimal()){
@@ -159,7 +161,7 @@ public class Owl extends Animal {
                             return true;
                         }
                     }
-                } else if (rowMovement < 0 && colMovement > 0) {
+                } else if (rowDiff < 0 && colDiff > 0) {
                     int stepsLeft = colMovement;
                     for (int i = 1; i <= stepsLeft; i++){
                         if (withCreature(oldRow - i, oldCol + i) && game.getSquare(oldRow - i, oldCol + i).isHasAnimal()){
@@ -171,7 +173,7 @@ public class Owl extends Animal {
                             return true;
                         }
                     }
-                }else if (rowMovement< 0 && colMovement < 0){
+                }else if (rowDiff < 0 && colDiff < 0){
                     int stepsLeft = colMovement;
                     for (int i = 1; i <= stepsLeft; i++){
                         if (withCreature(oldRow - i, oldCol - i) && game.getSquare(oldRow - i, oldCol - i).isHasAnimal()){

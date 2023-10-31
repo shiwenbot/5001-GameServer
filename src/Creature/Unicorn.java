@@ -7,16 +7,19 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class Unicorn extends Creature{
-    public String name = "Under-appreciated Unicorn";
-    public String shortName = "UU";
-    public int attack = 14;
-    public String description = "The UU is a unicorn that is under-appreciated by the other mythical creatures because it is often mistaken for a horse with a horn.";
-    public boolean confused;
-    public boolean charmed;
-    public String type = "Creature";
-    public int confusedTurnLeft = 0;
-    public int charmedTurnLeft = 0;
+    private String name = "Under-appreciated Unicorn";
+    private String shortName = "UU";
+    private int attack = 14;
+    private String description = "The UU is a unicorn that is under-appreciated by the other mythical creatures because it is often mistaken for a horse with a horn.";
+    private boolean confused;
+    private boolean charmed;
+    private String type = "Creature";
+    private int confusedTurnLeft = 0;
+    private int charmedTurnLeft = 0;
     public HashMap<Animal, Integer> chamAnimal = new HashMap<>();
+    public HashMap<Animal, Integer> getChamAnimal() {
+        return chamAnimal;
+    }
     public void updateChamAnimal(){
         // 创建一个迭代器以遍历 HashMap 的键
         Iterator<Map.Entry<Animal, Integer>> iterator = chamAnimal.entrySet().iterator();

@@ -7,7 +7,7 @@ import java.util.*;
 
 
 public class Game {
-    private static Game instance;
+    public static Game instance;
     public final int ROW = 20;
     public final int COL = 20;
     public Square[][] board = new Square[ROW][COL];
@@ -35,6 +35,11 @@ public class Game {
 
     public static Game getInstance(long seed) {
         if (instance == null) {
+            objectPosition.clear();
+            spellPosition.clear();
+            animals.clear();
+            creatures.clear();
+            errorMessage = null;
             instance = new Game(seed);
         }
         return instance;
@@ -134,7 +139,11 @@ public class Game {
     }
 
     public void moveAnimal(Animal animal, int oldRow, int oldCol, int newRow, int newCol) throws Exception {
-        if (animal.isMoveable() == true) {
+        if (gameOver()){
+            errorMessage = "Game is over!";
+            throw new Exception(errorMessage);
+        }
+        else if (animal.isMoveable() == true) {
             //移动并更新moveable
             animal.move(oldRow, oldCol, newRow, newCol);
             animal.setMoveable(false);
@@ -174,6 +183,7 @@ public class Game {
                     creature.updateChamAnimal();
                 }
             }
+            errorMessage = null;
         } else {
             errorMessage = "It is not " + animal.getName() + "'s turn.";
             throw new Exception(errorMessage);
@@ -221,6 +231,11 @@ public class Game {
     public boolean gameOver() {
         for (Animal animal : animals) {
             if (animal.getLifePoints() == 0) return true;
+        }
+        int count = 0;
+        for (Animal animal : animals){
+            if (animal.getSquare(animal).getRow() == 0) count++;
+            if (count == 5) return true;
         }
         return false;
     }
@@ -286,8 +301,10 @@ public class Game {
             Animal nextAnimal = findNextAnimal(animal);
             nextAnimal.setMoveable(true);
             nextAnimal.setSpellable(true);
+            errorMessage = null;
         } else {
-            throw new Exception("This is not your turn.");
+            errorMessage = "It is not " + animal.getName() + "'s turn.";
+            throw new Exception(errorMessage);
         }
     }
 
@@ -368,7 +385,7 @@ public class Game {
         for (int i = 0; i < 8; i++) {
             int adjacentRow = curRow + dirRow[i];
             int adjacentCol = curCol + dirCol[i];
-            if (isValidCoordinate(adjacentRow, adjacentRow)) {
+            if (isValidCoordinate(adjacentRow, adjacentCol)) {
                 boolean hasCreature = this.board[adjacentRow][adjacentCol].isHasCreature();
                 if (hasCreature) {
                     return (Creature) findCreatureByCoordinate(objectPosition, adjacentRow, adjacentCol);
