@@ -120,6 +120,9 @@ public class Rabbit extends Animal {
             } else {
                 if (withCreature(oldRow + (newRow - oldRow) / 2, oldCol + (newCol - oldCol) / 2)) {
                     game.getSquare(oldRow + (newRow - oldRow) / 2, oldCol + (newCol - oldCol) / 2).setAnimal(this);
+                } else if (game.board[oldRow + (newRow - oldRow) / 2][oldCol + (newCol - oldCol) / 2].isHasAnimal()) {
+                    errorMessage = "The rabbit cannot move because there is an animal in the way.";
+                    throw new Exception(errorMessage);
                 } else {
                     game.getSquare(newRow, newCol).setAnimal(this);
                 }

@@ -16,8 +16,9 @@ import java.util.Random;
 import static Board.Game.*;
 
 public class GameServerMain {
-    public static long seed;
     public static int port;
+    public static long seed;
+
 
     /**
      * The main method of the Game Server.
@@ -26,10 +27,10 @@ public class GameServerMain {
      * Command line arguments containing the seed and port number.
      */
     public static void main(String[] args) {
-        //seed = Integer.parseInt(args[0]);
-        //port = Integer.parseInt(args[0]);
-        seed = 1;
-        port = 8088;
+        port = Integer.parseInt(args[0]);
+        seed = Integer.parseInt(args[1]);
+        //port = 8088;
+        //seed = 1;
         try {
             ServerSocket serverSocket = new ServerSocket(port);
             System.out.println("Server listening on port " + port);

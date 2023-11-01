@@ -1,11 +1,12 @@
-当前动物的伤害计算要发生在turn移动到下一个动物以后
-移动以后turn不++怎么办?可以用bool判断是否移动过
-移动失败的时候有提示，提示不一样，可能是有动物，可能是超距离了
+Hope this document can help understand my code:
+In my code, after move is called, turn will be moved to the next animal. According to the rule of this game, 
+after an animal moves, both this animal and the next can cast spell. Therefore, in my castSpell method, I allow 
+both the current turn and previous turn animal cast spell. But I will only update turn if current turn animal 
+casts spell to make sure turn is correct. Whether an animal is able to move and cast spell or not is determined 
+by boolean moveable and spellable
 
-我知道了这对row和col有东西以后，怎么知道是什么东西？
-尝试移动等动作以后，在页面上会有一个返回值告诉玩家是否成功了，感觉会是和exception有关
-问题：moveAnimal应不应该改turn
-creature是什么时候传？
+I use HashMap<Object, Coordinate> to store the location of animal, creature and spell. Class Coordinate has getRow
+and getCol method.
 
-bug：如果动物没有移动而是直接施法，那么endPreviousTurn就不会执行
-在边缘施法会失败，原因是超出了index
+In Animal, isStraightLine is used to check whether an animal is moving in a straight line, withCreature checks 
+whether a square has animal. And all the move behaviour is in move method, thus there will not be dig, fly and jump

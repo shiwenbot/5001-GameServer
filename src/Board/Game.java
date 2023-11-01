@@ -282,9 +282,10 @@ public class Game {
                     for (int i = 0; i < 8; i++) {
                         int adjacentRow = curRow + dirRow[i];
                         int adjacentCol = curCol + dirCol[i];
-                        this.board[adjacentRow][adjacentCol].changeVisibile(true);
+                        if (isValidCoordinate(adjacentRow, adjacentCol)){
+                            this.board[adjacentRow][adjacentCol].changeVisibile(true);
+                        }
                     }
-                    animal.getSpells().put(spell, animal.getSpells().get(spell) - 1);
                     break;
                 case "Heal":
                     animal.heal();
